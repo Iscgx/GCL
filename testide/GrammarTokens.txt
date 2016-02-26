@@ -1,0 +1,61 @@
+//Token definitions for Grammar Lexer
+lowerCase [a-z]
+upperCase [A-Z]
+letter [a-zA-Z]
+digit [0-9]
+%%
+nonTerminal {lowerCase}({letter}|{digit}|_)+
+terminal {upperCase}({letter}|{digit}|_)+
+//operadores
+;
+:
+\(
+\)
+\[
+\]
+\{
+\}
+'.'
+->
+'+''+'
+--
+'*'
+&
+^
+'/'
+%
+'+'
+-
+<<
+>>
+<
+>
+<=
+>=
+==
+!=
+//operador xor
+>'|'<
+'|'
+&&
+'|''|'
+?
+:
+=
+'*'=
+'/'=
+%=
+'+'=
+-=
+>>=
+<<=
+&=
+>'|'<=
+'|'=
+,
+!
+~
+//operador para mapping
+=>
+//Or
+\\'|'

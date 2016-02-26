@@ -1,0 +1,69 @@
+struct STRUCT{
+	int one;
+	char two;
+	double three;
+};
+
+private class Test
+{
+
+	private property double atributo;
+
+	@lowlevel{
+		using namespace std;
+
+		//c++
+	}@
+	
+	public void test() {
+		unsigned int something;
+	}
+
+	public void main()
+	{
+		int a = 0 ; int c = 0 ;
+		printf();
+		functionCall(b, n / h);
+		anotherFunctionCall(a,c,h,jh,df);
+		
+		String string = "string";
+
+		Objeto.propiedad(Objeto.propiedad(Objeto.propiedad(3+"hola")));
+
+		_ConsoleWriteLine("String con valor: " + prtto);
+
+		if(a == b)
+			i++;
+
+		if(b >= a)
+		{
+			a++;
+		}
+		else
+		{
+			b++;
+			for(int i = 0;i < _SIZE;i++)
+			{
+				Objeto.propiedad += 6;
+				do{
+					switch(variable)
+					{
+					case 1:
+						break;
+					case 2:
+						break;
+					case 3:
+						continue;
+					case 4:
+						while( w <= h)
+							w++;
+						break;
+					default:
+						printf("");
+						break;
+					}
+				}while(true);
+			}
+		}
+	}
+}

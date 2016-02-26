@@ -1,0 +1,26 @@
+int main(){
+	int a=3;
+	int c=a+6;
+	//Este es un comentario
+	printf("Hola Mundo");
+	const int SIZE = 345;
+	char **array[SIZE];
+	char a = 'h';
+	int value = 4567;
+	long value = 768L;
+	short value = 9079S;
+	double value = 8967.003;
+	float value = 13.34F;
+	//Este es otro comentario
+	long double value = 5678.9034L;
+	char value = 'h';
+	/* Todo
+lo que este entre estos operadores
+son 
+unos 	   unos
+			comentarios
+
+	*/
+	objeto.metodo();
+	char hola = '\n';
+}
