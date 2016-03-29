@@ -19,7 +19,6 @@ namespace GCL.Syntax
         private readonly Stack<int> nodeStack;
         private readonly Stack<Symbol> temporalStack;
         private readonly List<Symbol> productionSymbols;
-        private readonly ILexer lexer;
         private readonly Dictionary<Production, string> semanticMethods;
         private readonly CompiledClass compiledSemanticMethods;
         private readonly SemanticAnalysis semanticAnalysis;
@@ -52,8 +51,7 @@ namespace GCL.Syntax
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
             this.semanticAnalysis = semanticAnalysis;
-            this.lexer = codeLexer;
-            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
+            stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods);
 
             foreach (var token in grammarTokens)
             {
