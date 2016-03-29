@@ -63,7 +63,7 @@ namespace GCL.Syntax
             parser = new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
             this.lexer.TokenCourier += ParseToken;
 
-            codeGenerator = new GclCodeGenerator(10000);
+            codeGenerator = new GclCodeGenerator();
             dynamicCode.AddToScope(codeGenerator, "codegen");
 
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
