@@ -9,7 +9,7 @@ namespace GCL.Lex
     public class Lexer : ILexer
     {
         public List<string> TokenNames { get; private set; } //Token Names with corresponding ID (index)
-        public Action<Token> TokenCourier { get; set; }
+        private Action<Token> TokenCourier { get; set; }
 
         private List<Automata> automatas;
         private int _string, lowlevel, cSharpCode, error, endOfFile, newLine; //Index of string token type, lowlevel type and EOF token type
@@ -24,10 +24,15 @@ namespace GCL.Lex
             InitAllAutomata();
         }
 
-        public void Start(string sourceCode)
+        public IEnumerable<Token> Parse(string sourceCode)
         {
+            var parsedTokens = new List<Token>();
+            TokenCourier = parsedTokens.Add;
+
             PreProcessSourceCode(sourceCode);
             ProcessSourceCode(processedSourceCode);
+
+            return parsedTokens;
         }
 
         private void InitAllAutomata()

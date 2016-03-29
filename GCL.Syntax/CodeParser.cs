@@ -19,11 +19,10 @@ namespace GCL.Syntax
         private readonly Stack<int> nodeStack;
         private readonly Stack<Symbol> temporalStack;
         private readonly List<Symbol> productionSymbols;
-        private readonly ILexer lexer;
         private readonly Dictionary<Production, string> semanticMethods;
         private readonly CompiledClass compiledSemanticMethods;
         private readonly SemanticAnalysis semanticAnalysis;
-        private readonly GclCodeGenerator codeGenerator;
+        private readonly GclCodeGenerator gclCodeGenerator;
         private readonly BoolWrapper atDevice;
         private readonly BoolWrapper cudaDefined;
 
@@ -36,16 +35,15 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(
-            ILexer codeLexer,
-            string codeGrammar,
-            ILexer readGrammarLexer,
-            GclCodeGenerator gclCodeGenerator,
+        public CodeParser(GclCodeGenerator gclCodeGenerator,
             DynamicCodeProvider dynamicCodeProvider,
-            SemanticAnalysis semanticAnalysis)
+            SemanticAnalysis semanticAnalysis,
+            Dictionary<Production, string> semanticMethods,
+            StringGrammar stringGrammar,
+            Parser parser)
         {
             var then = DateTime.Now;
-            semanticMethods = new Dictionary<Production, string>();
+            this.semanticMethods = semanticMethods;
             nodeStack = new Stack<int>();
             nodeStack.Push(0);
             temporalStack = new Stack<Symbol>();
@@ -53,21 +51,13 @@ namespace GCL.Syntax
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
             this.semanticAnalysis = semanticAnalysis;
-            this.lexer = codeLexer;
-            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
+            this.stringGrammar = stringGrammar;
+            
+            this.parser = parser;
 
-            readGrammarLexer.TokenCourier += stringGrammar.AddSymbolDefinition;
+            this.gclCodeGenerator = gclCodeGenerator;
 
-            readGrammarLexer.Start(codeGrammar);
-            stringGrammar.DefineTokens();
-            parser = new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
-            this.lexer.TokenCourier += ParseToken;
-
-            codeGenerator = gclCodeGenerator;
-            dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
-            dynamicCodeProvider.AddToScope(this.semanticAnalysis, "semantic");
             dynamicCodeProvider.AddToScope(productionSymbols, "element");
-            dynamicCodeProvider.AddToScope(this.semanticAnalysis.ThrowError, "ThrowError");
             dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
             dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
 
@@ -88,13 +78,16 @@ namespace GCL.Syntax
             Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
-        public string Parse(string code)
+        public string Parse(IEnumerable<Token> tokens)
         {
             nodeStack.Clear();
             nodeStack.Push(0);
             temporalStack.Clear();
-            lexer.Start(code);
-            return codeGenerator.End();
+            foreach (var token in tokens)
+            {
+                ParseToken(token);
+            }
+            return gclCodeGenerator.End();
         }
 
         public void ParseToken(Token token)

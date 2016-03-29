@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using GCL.Lex;
 using GCL.Syntax;
+using GCL.Syntax.Data;
 using GCL.Syntax.Dynamic;
 using Semantic;
 using Xunit;
@@ -25,13 +26,33 @@ namespace Syntax.Tests
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
 
-            var codeParser = new CodeParser(new Lexer(sourceTokens),
-                grammarCode,
-                new Lexer(grammarTokens), 
-                new GclCodeGenerator(),
-                new DynamicCodeProvider(),
-                new SemanticAnalysis());
-            var code = codeParser.Parse(sourceCode);
+            ILexer readGrammarLexer = new Lexer(grammarTokens);
+            ILexer codeLexer = new Lexer(sourceTokens);
+            DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
+            var semanticMethods = new Dictionary<Production, string>();
+
+            var stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods);
+
+            foreach (var token in readGrammarLexer.Parse(grammarCode))
+            {
+                stringGrammar.AddSymbolDefinition(token);
+            }
+
+            stringGrammar.DefineTokens();
+
+            var gclCodeGenerator = new GclCodeGenerator();
+            var semanticAnalysis = new SemanticAnalysis();
+
+            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
+            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
+            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
+
+            var codeParser = new CodeParser(gclCodeGenerator,
+                dynamicCodeProvider,
+                semanticAnalysis,
+                semanticMethods,
+                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
+            var code = codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             code.Length.Should().Be(415);
         }
 
@@ -41,13 +62,32 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
-            var codeParser = new CodeParser(new Lexer(sourceTokens),
-                grammarCode,
-                new StubLexer(),
-                new GclCodeGenerator(),
-                new DynamicCodeProvider(),
-                new SemanticAnalysis());
-            codeParser.Parse(sourceCode);
+            ILexer readGrammarLexer = new StubLexer();
+            ILexer codeLexer = new Lexer(sourceTokens);
+            DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
+            var semanticMethods = new Dictionary<Production, string>();
+            var stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods);
+
+            foreach (var token in readGrammarLexer.Parse(grammarCode))
+            {
+                stringGrammar.AddSymbolDefinition(token);
+            }
+
+            stringGrammar.DefineTokens();
+
+            var gclCodeGenerator = new GclCodeGenerator();
+            var semanticAnalysis = new SemanticAnalysis();
+
+            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
+            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
+            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
+
+            var codeParser = new CodeParser(gclCodeGenerator,
+                dynamicCodeProvider,
+                semanticAnalysis,
+                semanticMethods,
+                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
+            codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
         }
     }
 
@@ -57,9 +97,9 @@ namespace Syntax.Tests
 
         public Action<Token> TokenCourier { get; set; }
 
-        public void Start(string sourceCode)
+        public IEnumerable<Token> Parse(string sourceCode)
         {
-            
+            return Enumerable.Empty<Token>();
         }
     }
 }

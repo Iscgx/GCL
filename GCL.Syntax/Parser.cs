@@ -9,21 +9,21 @@ namespace GCL.Syntax
     public class Parser
     {
         public Grammar Grammar { get; private set; }
-        private readonly Dictionary<Node, Node> nodes;
+        private readonly Dictionary<Node, Node> nodes = new Dictionary<Node, Node>();
 
         public SyntaxTable SyntaxTable { get; private set; }
 
-        public Parser(Grammar grammar, Symbol initial)
+        public Parser(Grammar grammar, Symbol initialSymbol)
         {
             Grammar = grammar;
-            nodes = new Dictionary<Node, Node>();
-            var head = new Node();
             var start = grammar.NewSymbol(SymbolType.NonTerminal);
-            var production = new Production(start, initial);
+            var production = new Production(start, initialSymbol);
             grammar.Add(start, production);
+
+            var head = new Node();
             head.Kernel.Add(production);
             Closure(head);
-            SyntaxTable = new SyntaxTable(new List<Node>(nodes.Select(e => e.Key)), head, this, start);
+            SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, start);
         }
 
         private void Closure(Node node)
