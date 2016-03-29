@@ -20,9 +20,20 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
-            var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
-            var codeParser = new CodeParser(sourceTokens, grammarCode, new Lexer(grammarTokens));
+            var codeParser = new CodeParser(sourceTokens, grammarCode, new StubLexer());
             codeParser.Parse(sourceCode);
+        }
+    }
+
+    public class StubLexer : ILexer
+    {
+        public List<string> TokenNames => new List<string>();
+
+        public Action<Token> TokenCourier { get; set; }
+
+        public void Start(string sourceCode)
+        {
+            
         }
     }
 }

@@ -19,7 +19,7 @@ namespace GCL.Syntax
         private readonly Stack<int> nodeStack;
         private readonly Stack<Symbol> temporalStack;
         private readonly List<Symbol> productionSymbols;
-        private readonly Lexer lexer;
+        private readonly ILexer lexer;
         private readonly Dictionary<Production, string> semanticMethods;
         private readonly CompiledClass compiledSemanticMethods;
         private readonly SemanticAnalysis semantic;
@@ -36,7 +36,7 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(string tokensCode, string codeGrammar, Lexer readGrammarLexer)
+        public CodeParser(string tokensCode, string codeGrammar, ILexer readGrammarLexer)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
