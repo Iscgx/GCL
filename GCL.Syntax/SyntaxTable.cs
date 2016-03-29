@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using GCL.Syntax.Data;
 using Semantic;
-using Syntax.Data;
 
-namespace Syntax
+namespace GCL.Syntax
 {
     public enum ActionType
     {

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using GCL.Syntax.Data;
 using Semantic;
-using Token_Analizer;
-using Syntax.Data;
 
-namespace Syntax
+namespace GCL.Syntax
 {
 
     public class Parser

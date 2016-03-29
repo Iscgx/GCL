@@ -2,7 +2,7 @@
 using System.Text;
 using Semantic;
 
-namespace Syntax.Data
+namespace GCL.Syntax.Data
 {
 
     /// <summary>

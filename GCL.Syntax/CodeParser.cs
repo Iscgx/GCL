@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using Token_Analizer;
+using GCL.Syntax.Data;
+using GCL.Syntax.Dynamic;
 using Semantic;
-using Syntax.Data;
-using Syntax.Dynamic;
+using Token_Analizer;
 
-namespace Syntax
+namespace GCL.Syntax
 {
     public delegate void OnLexicalError(string message);
 

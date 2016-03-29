@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using GCL.Syntax.Data;
 using Semantic;
-using Syntax.Data;
 using Attribute = Semantic.Attribute;
 
-namespace Syntax
+namespace GCL.Syntax
 {    
     public class Grammar : IEnumerable<List<Production>>
     {

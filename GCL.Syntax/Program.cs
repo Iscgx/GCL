@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using Token_Analizer;
 
-namespace Syntax
+namespace GCL.Syntax
 {
     class Program
     {

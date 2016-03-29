@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Syntax.Data
+namespace GCL.Syntax.Data
 {
     public class NodeArea : IEnumerable<Element>
     {

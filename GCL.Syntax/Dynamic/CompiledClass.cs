@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Syntax.Dynamic
+namespace GCL.Syntax.Dynamic
 {
     public class CompiledClass
     {

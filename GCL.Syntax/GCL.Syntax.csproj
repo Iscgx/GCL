@@ -7,8 +7,8 @@
     <ProjectGuid>{C7985623-3429-48C3-8136-B1F574B527AC}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>gcl2</RootNamespace>
-    <AssemblyName>gcl2</AssemblyName>
+    <RootNamespace>GCL.Syntax</RootNamespace>
+    <AssemblyName>GCL.Syntax</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
@@ -59,8 +59,8 @@
     <Compile Include="Data\NodeArea.cs" />
     <Compile Include="Data\Production.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parser.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SintacticParserException.cs" />
     <Compile Include="StringGrammar.cs" />
     <Compile Include="CodeParser.cs" />
@@ -81,11 +81,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Semantic\Semantic.csproj">
+    <ProjectReference Include="..\Semantic\Semantic.csproj">
       <Project>{79a5f6f3-8fdc-4670-aaaa-dedba4acb2df}</Project>
       <Name>Semantic</Name>
     </ProjectReference>
-    <ProjectReference Include="Token_Analizer\Token_Analizer.csproj">
+    <ProjectReference Include="..\Token_Analizer\Token_Analizer.csproj">
       <Project>{2b6d6572-77f2-4f4c-bb4c-316948e45bf1}</Project>
       <Name>Token_Analizer</Name>
     </ProjectReference>

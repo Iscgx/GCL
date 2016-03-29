@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Semantic;
 
-namespace Syntax
+namespace GCL.Syntax
 {
     [Serializable]
     public class GrammaticException : SintacticParserException

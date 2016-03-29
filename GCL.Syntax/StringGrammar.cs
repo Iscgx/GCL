@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Token_Analizer;
+using GCL.Syntax.Data;
+using GCL.Syntax.Dynamic;
 using Semantic;
-using Syntax.Data;
-using Syntax.Dynamic;
+using Token_Analizer;
 using Attribute = Semantic.Attribute;
 
-namespace Syntax
+namespace GCL.Syntax
 {
     public class StringGrammar
     {
