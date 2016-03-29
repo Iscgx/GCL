@@ -30,6 +30,17 @@ namespace GCL.Lex
             ProcessSourceCode(processedSourceCode);
         }
 
+        public IEnumerable<Token> Parse(string sourceCode)
+        {
+            var parsedTokens = new List<Token>();
+            TokenCourier = parsedTokens.Add;
+
+            PreProcessSourceCode(sourceCode);
+            ProcessSourceCode(processedSourceCode);
+
+            return parsedTokens;
+        }
+
         private void InitAllAutomata()
         {
             var macros = new Dictionary<string, string>();
