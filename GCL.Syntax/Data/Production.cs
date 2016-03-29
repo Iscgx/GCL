@@ -7,22 +7,20 @@ namespace GCL.Syntax.Data
 {
     public class Production
     {
-        private readonly Symbol producer;
-        private readonly List<Symbol> product;
         private readonly HashSet<Symbol> productSet;
         private readonly int hashCode;
 
-        public Symbol Producer => producer;
+        public Symbol Producer { get; }
 
-        public List<Symbol> Product => product;
+        public List<Symbol> Product { get; }
 
         public Production(Symbol producer, params Symbol[] extraProductSymbols)
         {
             if (producer.Type != SymbolType.NonTerminal)
                 throw new GrammaticException("Producer cannot be of type Terminal or Epsilon.", producer);
-            this.producer = producer;
-            product = new List<Symbol>(extraProductSymbols);
-            productSet = new HashSet<Symbol>(product);
+            this.Producer = producer;
+            Product = new List<Symbol>(extraProductSymbols);
+            productSet = new HashSet<Symbol>(Product);
             hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
         }
 
@@ -39,8 +37,8 @@ namespace GCL.Syntax.Data
         public override string ToString()
         {
             var builder = new StringBuilder();
-            builder.Append($"{producer} -> ");
-            foreach (var symbol in product)
+            builder.Append($"{Producer} -> ");
+            foreach (var symbol in Product)
             {
                 builder.Append(symbol);
             }
@@ -59,9 +57,9 @@ namespace GCL.Syntax.Data
             var otherProduction = (Production)obj;
             if (otherProduction.Product.Count != Product.Count)
                 return false;
-            for (var i = 0; i < product.Count; i++)
+            for (var i = 0; i < Product.Count; i++)
             {
-                if (product[i] != otherProduction.product[i])
+                if (Product[i] != otherProduction.Product[i])
                     return false;
             }
 
