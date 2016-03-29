@@ -46,21 +46,16 @@ namespace GCL.Syntax
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
-            this.semanticAnalysis = semanticAnalysis;
-            
-            productionSymbols = new List<Symbol>();
-            dynamicCodeProvider.AddToScope(this.semanticAnalysis, "semantic");
-            dynamicCodeProvider.AddToScope(productionSymbols, "element");
-            dynamicCodeProvider.AddToScope(this.semanticAnalysis.ThrowError, "ThrowError");
-            atDevice = new BoolWrapper(false);
-            cudaDefined = new BoolWrapper(false);
-            dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
-            dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
-            this.lexer = new Lexer(tokensCode);
-            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
             nodeStack = new Stack<int>();
             nodeStack.Push(0);
             temporalStack = new Stack<Symbol>();
+            productionSymbols = new List<Symbol>();
+            atDevice = new BoolWrapper(false);
+            cudaDefined = new BoolWrapper(false);
+            this.semanticAnalysis = semanticAnalysis;
+            this.lexer = new Lexer(tokensCode);
+            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
+
             readGrammarLexer.TokenCourier += stringGrammar.AddSymbolDefinition;
 
             readGrammarLexer.Start(codeGrammar);
@@ -70,6 +65,11 @@ namespace GCL.Syntax
 
             codeGenerator = gclCodeGenerator;
             dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
+            dynamicCodeProvider.AddToScope(this.semanticAnalysis, "semantic");
+            dynamicCodeProvider.AddToScope(productionSymbols, "element");
+            dynamicCodeProvider.AddToScope(this.semanticAnalysis.ThrowError, "ThrowError");
+            dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
+            dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
 
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
             try
