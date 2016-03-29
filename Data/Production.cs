@@ -7,29 +7,23 @@ namespace gcl2.Data
 {
     public class Production
     {
-        private readonly Symbol _producer;
-        private readonly List<Symbol> _product;
-        private readonly HashSet<Symbol> _productSet;
-        private readonly int _hashCode;
+        private readonly Symbol producer;
+        private readonly List<Symbol> product;
+        private readonly HashSet<Symbol> productSet;
+        private readonly int hashCode;
 
-        public Symbol Producer
-        {
-            get { return _producer; }
-        }
+        public Symbol Producer => producer;
 
-        public List<Symbol> Product
-        {
-            get { return _product; }
-        }
+        public List<Symbol> Product => product;
 
         public Production(Symbol producer, params Symbol[] extraProductSymbols)
         {
             if (producer.Type != SymbolType.NonTerminal)
                 throw new GrammaticException("Producer cannot be of type Terminal or Epsilon.", producer);
-            _producer = producer;
-            _product = new List<Symbol>(extraProductSymbols);
-            _productSet = new HashSet<Symbol>(_product);
-            _hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
+            this.producer = producer;
+            product = new List<Symbol>(extraProductSymbols);
+            productSet = new HashSet<Symbol>(product);
+            hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
         }
 
         public Production(Symbol producer, IEnumerable<Symbol> productionSymbols) : this(producer, productionSymbols.ToArray())
@@ -39,14 +33,14 @@ namespace gcl2.Data
 
         public bool Produces(Symbol symbol)
         {
-            return _productSet.Contains(symbol);
+            return productSet.Contains(symbol);
         }
 
         public override string ToString()
         {
             var builder = new StringBuilder();
-            builder.Append(string.Format("{0} -> ", _producer));
-            foreach (var symbol in _product)
+            builder.Append($"{producer} -> ");
+            foreach (var symbol in product)
             {
                 builder.Append(symbol);
             }
@@ -55,7 +49,7 @@ namespace gcl2.Data
 
         public override int GetHashCode()
         {
-            return _hashCode;
+            return hashCode;
         }
 
         public override bool Equals(object obj)
@@ -65,9 +59,9 @@ namespace gcl2.Data
             var otherProduction = (Production)obj;
             if (otherProduction.Product.Count != Product.Count)
                 return false;
-            for (var i = 0; i < _product.Count; i++)
+            for (var i = 0; i < product.Count; i++)
             {
-                if (_product[i] != otherProduction._product[i])
+                if (product[i] != otherProduction.product[i])
                     return false;
             }
 

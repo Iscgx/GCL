@@ -6,16 +6,17 @@ namespace gcl2.Data
 {
     public class NodeArea : IEnumerable<Element>
     {
-        private readonly HashSet<Element> _elements;
-        private int _hashCode = 0;
+        private readonly HashSet<Element> elements;
+        private int hashCode = 0;
+
         public NodeArea()
         {
-            _elements = new HashSet<Element>();
+            elements = new HashSet<Element>();
         }
 
         public NodeArea(IEnumerable<Element> collection)
         {
-            _elements = new HashSet<Element>(collection);
+            elements = new HashSet<Element>(collection);
         }
 
         public void Add(Element element)
@@ -24,7 +25,7 @@ namespace gcl2.Data
 // ReSharper disable NotResolvedInText
                 throw new ArgumentNullException("element cannot be null.");
 // ReSharper restore NotResolvedInText
-            _elements.Add(element);
+            elements.Add(element);
 
         }
 
@@ -39,14 +40,14 @@ namespace gcl2.Data
         {
             if (element == null)
                 return false;
-            return _elements.Contains(element);
+            return elements.Contains(element);
         }
 
         public override int GetHashCode()
         {
-            if (_hashCode == 0)
-                _hashCode = _elements.Aggregate(0, (current, element) => current ^ (486187739 & element.GetHashCode()));
-            return _hashCode;
+            if (hashCode == 0)
+                hashCode = elements.Aggregate(0, (current, element) => current ^ (486187739 & element.GetHashCode()));
+            return hashCode;
         }
 
         public override bool Equals(object obj)
@@ -54,7 +55,7 @@ namespace gcl2.Data
             if (obj == null || (obj is NodeArea) == false)
                 return false;
             var otherNodeArea = obj as NodeArea;
-            return _elements.SetEquals(otherNodeArea._elements);
+            return elements.SetEquals(otherNodeArea.elements);
         }
 
         public static bool operator ==(NodeArea n1, NodeArea n2)
@@ -76,17 +77,17 @@ namespace gcl2.Data
 
         public override string ToString()
         {
-            return string.Format("Count = {0}", _elements.Count);
+            return $"Count = {elements.Count}";
         }
 
         public IEnumerator<Element> GetEnumerator()
         {
-            return _elements.GetEnumerator();
+            return elements.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _elements.GetEnumerator();
+            return elements.GetEnumerator();
         }
     }
 }

@@ -8,59 +8,47 @@ namespace gcl2.Data
 {
     public class Node : IEnumerable<Element>
     {
-        private readonly NodeArea _kernel;
-        private readonly NodeArea _footer;
-        private readonly HashSet<Node> _neighbors;
-        private readonly Dictionary<Symbol, Node> _transtions;
+        private readonly NodeArea kernel;
+        private readonly NodeArea footer;
+        private readonly HashSet<Node> neighbors;
+        private readonly Dictionary<Symbol, Node> transtions;
 
-        public NodeArea Kernel
-        {
-            get { return _kernel; }
-        }
+        public NodeArea Kernel => kernel;
 
-        public NodeArea Footer
-        {
-            get { return _footer; }
-        }
+        public NodeArea Footer => footer;
 
-        public Dictionary<Symbol, Node> Transitions
-        {
-            get
-            {
-                return new Dictionary<Symbol, Node>(_transtions);
-            }
-        }
+        public Dictionary<Symbol, Node> Transitions => new Dictionary<Symbol, Node>(transtions);
 
         public Node()
         {
-            _kernel = new NodeArea();
-            _footer = new NodeArea();
-            _transtions = new Dictionary<Symbol, Node>();
-            _neighbors = new HashSet<Node>();
+            kernel = new NodeArea();
+            footer = new NodeArea();
+            transtions = new Dictionary<Symbol, Node>();
+            neighbors = new HashSet<Node>();
         }
 
         public Node(IEnumerable<Element> kernel)
         {
-            _kernel = new NodeArea(kernel);
-            _footer = new NodeArea();
-            _transtions = new Dictionary<Symbol, Node>();
-            _neighbors = new HashSet<Node>();
+            this.kernel = new NodeArea(kernel);
+            footer = new NodeArea();
+            transtions = new Dictionary<Symbol, Node>();
+            neighbors = new HashSet<Node>();
         }
 
         public bool IsConnected(Node otherNode)
         {
-            return _neighbors.Contains(otherNode);
+            return neighbors.Contains(otherNode);
         }
 
         public void AddTransition(Symbol symbol, Node otherNode)
         {
-            _transtions[symbol] = otherNode;
-            _neighbors.Add(otherNode);
+            transtions[symbol] = otherNode;
+            neighbors.Add(otherNode);
         }
 
         public override int GetHashCode()
         {
-            return _kernel.GetHashCode() ^ _footer.GetHashCode();
+            return kernel.GetHashCode() ^ footer.GetHashCode();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -73,7 +61,7 @@ namespace gcl2.Data
             if (obj == null || (obj is Node) == false)
                 return false;
             var otherNode = obj as Node;
-            return _kernel == otherNode._kernel;
+            return kernel == otherNode.kernel;
         }
 
         public static bool operator ==(Node n1, Node n2)

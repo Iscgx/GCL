@@ -17,18 +17,12 @@ namespace gcl2.Data
         /// <summary>
         /// Returns the symbol being read by the read index.
         /// </summary>
-        public Symbol ReadSymbol
-        {
-            get { return Production.Product[ReadIndex]; }
-        }
+        public Symbol ReadSymbol => Production.Product[ReadIndex];
 
         /// <summary>
         /// Returns true if the product reading is completed.
         /// </summary>
-        public bool ReadCompleted
-        {
-            get { return ReadIndex == Production.Product.Count; }
-        }
+        public bool ReadCompleted => ReadIndex == Production.Product.Count;
 
         /// <summary>
         /// Creates an element with the default read index of 0.
@@ -99,7 +93,7 @@ namespace gcl2.Data
             }
 
 
-            return string.Format("{0} -> {1}●{2}", Production.Producer, left, right); ;
+            return $"{Production.Producer} -> {left}●{right}"; ;
         }
 
         public static bool operator ==(Element e1, Element e2)
