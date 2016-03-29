@@ -18,19 +18,19 @@ namespace Semantic
                 var arrayPrimitive = DefinedTypes[type];
                 var arrayType = new ArrayType(arrayPrimitive, dimensions, firstDimensionWidth, extraDimensionsWidth);
                 var variable = new Variable(name, arrayType, atDevice);
-                if (_blocks.Any())
+                if (blocks.Any())
                 {
-                    var currentBlock = _blocks[_blocks.Count() - 1];
+                    var currentBlock = blocks[blocks.Count() - 1];
                     if (currentBlock.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name);
                     else
                     {
                         currentBlock.AddVariable(variable);
                         var typeName = string.Format("array({0})", type);
-                        if (_definedArrays.ContainsKey(typeName) == false)
+                        if (definedArrays.ContainsKey(typeName) == false)
                         {
-                            _definedArrays.Add(typeName, arrayType);
-                            _stringByType.Add(arrayType, typeName);
+                            definedArrays.Add(typeName, arrayType);
+                            stringByType.Add(arrayType, typeName);
                             DefinedTypes.Add(typeName, arrayType);
                         }
 
@@ -39,58 +39,58 @@ namespace Semantic
                 }
                 else
                 {
-                    if (_globalSymbolTable.HasVariable(variable))
+                    if (globalSymbolTable.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name); //Already exists 
                     else
-                        _globalSymbolTable.AddVariable(variable);
+                        globalSymbolTable.AddVariable(variable);
                 } 
             }
         }
 
         public ArrayType GetArrayTypeFrom(string name)
         {
-            if (_blocks.Any())
+            if (blocks.Any())
             {
-                for (var i = _blocks.Count() - 1; i >= 0; i--)
+                for (var i = blocks.Count() - 1; i >= 0; i--)
                 {
-                    if (_blocks[i].Variables.ContainsKey(name)) //Variable found!!
+                    if (blocks[i].Variables.ContainsKey(name)) //Variable found!!
                     {
-                        return (ArrayType) _blocks[i].Variables[name].Type;
+                        return (ArrayType) blocks[i].Variables[name].Type;
                     }
                 }
             }
 
-            if (_globalSymbolTable.Variables.ContainsKey(name))
-                return (ArrayType)_globalSymbolTable.Variables[name].Type;
-            else if (_globalSymbolTable.DeviceSymbolTable.Variables.ContainsKey(name))
-                return (ArrayType)_globalSymbolTable.DeviceSymbolTable.Variables[name].Type;
+            if (globalSymbolTable.Variables.ContainsKey(name))
+                return (ArrayType)globalSymbolTable.Variables[name].Type;
+            else if (globalSymbolTable.DeviceSymbolTable.Variables.ContainsKey(name))
+                return (ArrayType)globalSymbolTable.DeviceSymbolTable.Variables[name].Type;
 
             else return null;
         }
 
-        public bool UseArray(string name, bool atDevice, int numberOfDimensions, out string BaseType)
+        public bool UseArray(string name, bool atDevice, int numberOfDimensions, out string baseType)
         {
             ISymbolTable globalTable;
             if (atDevice)
-                globalTable = _globalSymbolTable.DeviceSymbolTable;
+                globalTable = globalSymbolTable.DeviceSymbolTable;
             else
-                globalTable = _globalSymbolTable; 
+                globalTable = globalSymbolTable; 
 
-            if (_blocks.Any())
+            if (blocks.Any())
             {
-                for (var i = _blocks.Count() - 1; i >= 0; i--)
+                for (var i = blocks.Count() - 1; i >= 0; i--)
                 {
-                    if (_blocks[i].Variables.ContainsKey(name) &&
-                        _blocks[i].Variables[name].Type.Parameters != TypeParameters.IsStructure && (_blocks[i].Variables[name].Type.Parameters & TypeParameters.IsArray)== TypeParameters.IsArray) //Variable found!!
+                    if (blocks[i].Variables.ContainsKey(name) &&
+                        blocks[i].Variables[name].Type.Parameters != TypeParameters.IsStructure && (blocks[i].Variables[name].Type.Parameters & TypeParameters.IsArray)== TypeParameters.IsArray) //Variable found!!
                     {
-                        var arrayType = (_blocks[i].Variables[name].Type as ArrayType);
+                        var arrayType = (blocks[i].Variables[name].Type as ArrayType);
                         if (numberOfDimensions != arrayType.Dimensions)
                         {
                             Error("Array {0} expected {1} dimensions but was used with {2}.", name, arrayType.Dimensions, numberOfDimensions);
-                            BaseType = "error";
+                            baseType = "error";
                         }
                         else
-                            BaseType = _stringByType[arrayType.BaseType];
+                            baseType = stringByType[arrayType.BaseType];
                         
                         return true;
                     }
@@ -102,13 +102,13 @@ namespace Semantic
                 if (numberOfDimensions != arrayType.Dimensions)
                 {
                     Error("Array {0} expected {1} dimensions but was used with {2}.", name, arrayType.Dimensions, numberOfDimensions);
-                    BaseType = "error";
+                    baseType = "error";
                 }
                 else
-                    BaseType = _stringByType[arrayType.BaseType];
+                    baseType = stringByType[arrayType.BaseType];
                 return true;
             }
-            BaseType = "error";
+            baseType = "error";
             return false;
         }
     }

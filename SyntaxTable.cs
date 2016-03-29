@@ -20,14 +20,14 @@ namespace gcl2
 
     public class SyntaxTable
     {
-        private readonly Parser _parser;
-        private readonly Dictionary<int, Dictionary<Symbol, Tuple<ActionType, int>>> _actions;
-        private readonly Dictionary<Node, int> _nodes;
-        private readonly Dictionary<Production, int> _idByProduction;
-        private readonly Dictionary<int, Production> _productionById;
-        private readonly List<Tuple<ActionType, ActionType>> _errors; 
-        private readonly Symbol _startSymbol;
-        private readonly Node _head;
+        private readonly Parser parser;
+        private readonly Dictionary<int, Dictionary<Symbol, Tuple<ActionType, int>>> actions;
+        private readonly Dictionary<Node, int> nodes;
+        private readonly Dictionary<Production, int> idByProduction;
+        private readonly Dictionary<int, Production> productionById;
+        private readonly List<Tuple<ActionType, ActionType>> errors; 
+        private readonly Symbol startSymbol;
+        private readonly Node head;
 
         public OnError OnError;
 
@@ -35,18 +35,18 @@ namespace gcl2
         {
             if (nodes == null || parser == null)
                 throw new ArgumentNullException();
-            _parser = parser;
-            _head = head;
-            _actions = new Dictionary<int, Dictionary<Symbol, Tuple<ActionType, int>>>();
-            _idByProduction = new Dictionary<Production, int>();
-            _productionById = new Dictionary<int, Production>();
-            _errors = new List<Tuple<ActionType, ActionType>>();
-            _nodes = new Dictionary<Node, int>();
+            this.parser = parser;
+            this.head = head;
+            actions = new Dictionary<int, Dictionary<Symbol, Tuple<ActionType, int>>>();
+            idByProduction = new Dictionary<Production, int>();
+            productionById = new Dictionary<int, Production>();
+            errors = new List<Tuple<ActionType, ActionType>>();
+            this.nodes = new Dictionary<Node, int>();
 
             for (var i = 0; i < nodes.Count(); i++)
-                _nodes.Add(nodes[i], i);
+                this.nodes.Add(nodes[i], i);
 
-            _startSymbol = startSymbol;
+            this.startSymbol = startSymbol;
 
             FillProductions();
             FillTable();
@@ -55,27 +55,27 @@ namespace gcl2
         private void FillProductions()
         {
             var i = 0;
-            foreach (var element in _head.Footer)
+            foreach (var element in head.Footer)
             {
-                _idByProduction.Add(element.Production, i);
-                _productionById.Add(i, element.Production);
+                idByProduction.Add(element.Production, i);
+                productionById.Add(i, element.Production);
                 i++;
             }
         }
 
         private void FillTable()
         {
-            foreach (var node in _nodes.Select(e => e.Key))
+            foreach (var node in nodes.Select(e => e.Key))
             {
-                _actions.Add(_nodes[node], new Dictionary<Symbol, Tuple<ActionType, int>>());
-                if (node != _head && node.Kernel.Any(element => element.Production.Producer == _startSymbol))
-                    _actions[_nodes[node]][_parser.Grammar.EndOfFile] = new Tuple<ActionType, int>(ActionType.Accept, 0); //Accept input
+                actions.Add(nodes[node], new Dictionary<Symbol, Tuple<ActionType, int>>());
+                if (node != head && node.Kernel.Any(element => element.Production.Producer == startSymbol))
+                    actions[nodes[node]][parser.Grammar.EndOfFile] = new Tuple<ActionType, int>(ActionType.Accept, 0); //Accept input
                 foreach (var transition in node.Transitions)
                 {
                     if (transition.Key.Type == SymbolType.NonTerminal)
                     {
                         
-                        _actions[_nodes[node]][transition.Key] = new Tuple<ActionType, int>(ActionType.GoTo, _nodes[transition.Value]); //Goto Action
+                        actions[nodes[node]][transition.Key] = new Tuple<ActionType, int>(ActionType.GoTo, nodes[transition.Value]); //Goto Action
                     }
                     else if (transition.Key.Type != SymbolType.EndOfFile)
                     {
@@ -87,33 +87,33 @@ namespace gcl2
                         //        OnError(error);
                         //}
                         //else
-                            _actions[_nodes[node]][transition.Key] = new Tuple<ActionType, int>(ActionType.Shift, _nodes[transition.Value]); //Shift Action
+                            actions[nodes[node]][transition.Key] = new Tuple<ActionType, int>(ActionType.Shift, nodes[transition.Value]); //Shift Action
                     }
                 }
                 foreach (var element in node.Kernel)
                 {
-                    if (element.ReadCompleted == false || element.Production.Producer == _startSymbol) 
+                    if (element.ReadCompleted == false || element.Production.Producer == startSymbol) 
                         continue;
-                    foreach (var symbol in _parser.Grammar.Follow(element.Production.Producer))
+                    foreach (var symbol in parser.Grammar.Follow(element.Production.Producer))
                     {
-                        if (_nodes.ContainsKey(node) && _actions.ContainsKey(_nodes[node]) && _actions[_nodes[node]].ContainsKey(symbol))
+                        if (nodes.ContainsKey(node) && actions.ContainsKey(nodes[node]) && actions[nodes[node]].ContainsKey(symbol))
                         {
-                            var action = _actions[_nodes[node]][symbol];
-                            var error = new Tuple<ActionType, ActionType>(_actions[_nodes[node]][symbol].Item1,
+                            var action = actions[nodes[node]][symbol];
+                            var error = new Tuple<ActionType, ActionType>(actions[nodes[node]][symbol].Item1,
                                                                           ActionType.Shift);
-                            _errors.Add(error);
+                            errors.Add(error);
                             if (OnError != null)
                                 OnError(error);
                         }
                         else
                         {
-                            if (_idByProduction.ContainsKey(element.Production) == false)
+                            if (idByProduction.ContainsKey(element.Production) == false)
                             {
-                                _idByProduction.Add(element.Production, _productionById.Count);
-                                _productionById.Add(_productionById.Count, element.Production);
+                                idByProduction.Add(element.Production, productionById.Count);
+                                productionById.Add(productionById.Count, element.Production);
                             }
-                            _actions[_nodes[node]][symbol] = new Tuple<ActionType, int>(ActionType.Reduce,
-                                                                                        _idByProduction[
+                            actions[nodes[node]][symbol] = new Tuple<ActionType, int>(ActionType.Reduce,
+                                                                                        idByProduction[
                                                                                             element.Production]);
                                 //Reduce
                         }
@@ -126,20 +126,20 @@ namespace gcl2
         {
             get
             {
-                if (_actions[state].ContainsKey(symbol) == false)
+                if (actions[state].ContainsKey(symbol) == false)
                     return new Tuple<ActionType, int>(ActionType.Error, state);
-                return _actions[state][symbol];
+                return actions[state][symbol];
             }
         }
 
         public bool ContainsKey(int state, Symbol symbol)
         {
-             return _actions[state].ContainsKey(symbol);
+             return actions[state].ContainsKey(symbol);
         }
 
         public Production ProductionById(int id)
         {
-            return _productionById[id];
+            return productionById[id];
         }
    
     }

@@ -9,9 +9,9 @@ namespace Semantic
     {
         public bool Value { get; set; }
 
-        public BoolWrapper(bool Value)
+        public BoolWrapper(bool value)
         {
-            this.Value = Value;
+            this.Value = value;
         }
     }
 }

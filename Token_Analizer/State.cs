@@ -6,35 +6,35 @@ namespace Token_Analizer
     class State
     {
         //Field
-        private readonly List<Transition> _transitions;
-        private bool _isFinal;
+        private readonly List<Transition> transitions;
+        private bool isFinal;
         public int Id { get; set; }
 
         //Constructors
         public State(bool isFinal)
         {
-            _isFinal = isFinal;
-            _transitions = new List<Transition>();
+            this.isFinal = isFinal;
+            transitions = new List<Transition>();
         }
 
         //Methods
         public bool StateIsFinal()
         {
-            return _isFinal;
+            return isFinal;
         }
 
         public void ChangeStateType(bool isFinal)
         {
-            _isFinal = isFinal;
+            this.isFinal = isFinal;
         }
 
         public void AddTransition(State state, char symbol) {
-            _transitions.Add(new Transition(state, symbol));
+            transitions.Add(new Transition(state, symbol));
         }
 
         public void AddTransition(State state, char symbol, bool isCombo)
         {
-            _transitions.Add(new Transition(state, symbol, isCombo));
+            transitions.Add(new Transition(state, symbol, isCombo));
         }
 
         public void AddTransition(Transition t)
@@ -45,12 +45,12 @@ namespace Token_Analizer
         public List<State> Move(char symbol)
         {
             //Foreach transition return states that could move (List of states)
-            return _transitions.Select(t => t.Move(symbol)).Where(s => s != null).ToList();
+            return transitions.Select(t => t.Move(symbol)).Where(s => s != null).ToList();
         }
 
         public List<Transition> GetTransitions()
         {
-            return _transitions;
+            return transitions;
         }
 
         public void CopyTransitionsFrom(State externState)
@@ -65,7 +65,7 @@ namespace Token_Analizer
 
         public override string ToString()
         {
-            return string.Format("{0}, {1}", Id, _isFinal);
+            return string.Format("{0}, {1}", Id, isFinal);
         }
     }
 }

@@ -10,36 +10,36 @@ namespace gcl2
 {    
     public class Grammar : IEnumerable<List<Production>>
     {
-        private readonly Dictionary<Symbol, List<Production>> _productions;
-        private readonly Dictionary<Symbol, HashSet<Symbol>> _calculatedFirsts;
-        private readonly Dictionary<Symbol, HashSet<Symbol>> _calculatedFollows;
-        private readonly Dictionary<Symbol, HashSet<Production>> _products;
-        private readonly List<Symbol> _terminals;
-        private readonly List<Symbol> _nonTerminals; 
-        private readonly Symbol _epsilon;
-        private readonly Symbol _endOfFile;
-        private bool _hasCalculatedFollows = false;
-        private int _symbolIdentity = 1;
+        private readonly Dictionary<Symbol, List<Production>> productions;
+        private readonly Dictionary<Symbol, HashSet<Symbol>> calculatedFirsts;
+        private readonly Dictionary<Symbol, HashSet<Symbol>> calculatedFollows;
+        private readonly Dictionary<Symbol, HashSet<Production>> products;
+        private readonly List<Symbol> terminals;
+        private readonly List<Symbol> nonTerminals; 
+        private readonly Symbol epsilon;
+        private readonly Symbol endOfFile;
+        private bool hasCalculatedFollows = false;
+        private int symbolIdentity = 1;
         public Symbol Epsilon
         {
-            get { return _epsilon; }
+            get { return epsilon; }
         }
 
         public Symbol EndOfFile
         {
-            get { return _endOfFile; }
+            get { return endOfFile; }
         }
 
         public Grammar()
         {
-            _productions = new Dictionary<Symbol, List<Production>>();
-            _epsilon = new Symbol(SymbolType.Epsilon, 0);
-            _endOfFile = new Symbol(SymbolType.EndOfFile, -1);
-            _calculatedFirsts = new Dictionary<Symbol, HashSet<Symbol>>();
-            _products = new Dictionary<Symbol, HashSet<Production>>();
-            _calculatedFollows = new Dictionary<Symbol, HashSet<Symbol>>();
-            _terminals = new List<Symbol>();
-            _nonTerminals = new List<Symbol>();
+            productions = new Dictionary<Symbol, List<Production>>();
+            epsilon = new Symbol(SymbolType.Epsilon, 0);
+            endOfFile = new Symbol(SymbolType.EndOfFile, -1);
+            calculatedFirsts = new Dictionary<Symbol, HashSet<Symbol>>();
+            products = new Dictionary<Symbol, HashSet<Production>>();
+            calculatedFollows = new Dictionary<Symbol, HashSet<Symbol>>();
+            terminals = new List<Symbol>();
+            nonTerminals = new List<Symbol>();
             
         }
 
@@ -49,50 +49,50 @@ namespace gcl2
                 return Epsilon;
             if (type == SymbolType.EndOfFile)
                 return EndOfFile;
-            var symbol = new Symbol(type, _symbolIdentity, properties);
+            var symbol = new Symbol(type, symbolIdentity, properties);
             if (type == SymbolType.NonTerminal)
-                _nonTerminals.Add(symbol);
+                nonTerminals.Add(symbol);
             else if (type == SymbolType.Terminal)
-                _terminals.Add(symbol);
+                terminals.Add(symbol);
 
-            _symbolIdentity += 1;
+            symbolIdentity += 1;
             return symbol;
         }
 
         public void Add(Symbol producer)
         {
-            if (_productions.ContainsKey(producer) == false)
-                _productions.Add(producer, new List<Production>());
+            if (productions.ContainsKey(producer) == false)
+                productions.Add(producer, new List<Production>());
         }
 
         public void Add(Symbol producer, Production production, params Production[] extraProductions)
         {
             Add(producer);
-            _productions[producer].Add(production);
+            productions[producer].Add(production);
             Relate(production);
             foreach (var prod in extraProductions)
             {
-                _productions[producer].Add(prod);
+                productions[producer].Add(prod);
                 Relate(prod);
             }
         }
 
         public bool Has(Symbol producer)
         {
-            return _productions.ContainsKey(producer);
+            return productions.ContainsKey(producer);
         }
 
         public List<Production> Produces(Symbol symbol)
         {
-            if (_products.ContainsKey(symbol) == false)
+            if (products.ContainsKey(symbol) == false)
                 return new List<Production>();
-            return new List<Production>(_products[symbol]);
+            return new List<Production>(products[symbol]);
         }
 
         public HashSet<Symbol> First(Symbol symbol)
         {
-            if (_calculatedFirsts.ContainsKey(symbol) == true)
-                return new HashSet<Symbol>(_calculatedFirsts[symbol]);
+            if (calculatedFirsts.ContainsKey(symbol) == true)
+                return new HashSet<Symbol>(calculatedFirsts[symbol]);
             return First(new List<Symbol>() {symbol});
         }
 
@@ -105,23 +105,23 @@ namespace gcl2
 
         public HashSet<Symbol> Follow(Symbol symbol)
         {
-            if (_hasCalculatedFollows == false)
+            if (hasCalculatedFollows == false)
             {
                 CalculateFollows();
-                _hasCalculatedFollows = true;
+                hasCalculatedFollows = true;
             }
-            return _calculatedFollows[symbol];
+            return calculatedFollows[symbol];
         }
 
         private void CalculateFollows()
         {
             var firstsToAdd = new List<Tuple<Symbol, List<List<Symbol>>>>();
             var followsToAdd = new List<Tuple<Symbol, Symbol>>();
-            foreach (var nonTerminal in _nonTerminals)
+            foreach (var nonTerminal in nonTerminals)
             {
-                _calculatedFollows[nonTerminal] = new HashSet<Symbol>();
+                calculatedFollows[nonTerminal] = new HashSet<Symbol>();
                 if (nonTerminal.Id == 1)
-                    _calculatedFollows[nonTerminal].Add(EndOfFile);
+                    calculatedFollows[nonTerminal].Add(EndOfFile);
                 foreach (var production in Produces(nonTerminal))
                 {
                     for (var i = 0; i < production.Product.Count; i++)
@@ -154,7 +154,7 @@ namespace gcl2
             {
                 foreach (var firstBeta in tuple.Item2.Select(First))
                 {
-                    _calculatedFollows[tuple.Item1].UnionWith(firstBeta);
+                    calculatedFollows[tuple.Item1].UnionWith(firstBeta);
                 }
             }
 
@@ -163,10 +163,10 @@ namespace gcl2
                 var changed = false;
                 foreach (var tuple in followsToAdd)
                 {
-                    var pastCount = _calculatedFollows[tuple.Item1].Count;
-                    var followProducer = _calculatedFollows[tuple.Item2];
-                    _calculatedFollows[tuple.Item1].UnionWith(followProducer);
-                    if (pastCount != _calculatedFollows[tuple.Item1].Count)
+                    var pastCount = calculatedFollows[tuple.Item1].Count;
+                    var followProducer = calculatedFollows[tuple.Item2];
+                    calculatedFollows[tuple.Item1].UnionWith(followProducer);
+                    if (pastCount != calculatedFollows[tuple.Item1].Count)
                         changed = true;
                 }
                 if (changed == false)
@@ -227,21 +227,21 @@ namespace gcl2
         {
             foreach (var symbol in symbols.TakeWhile(symbol => symbol != caller))
             {
-                if (_calculatedFirsts.ContainsKey(symbol) == true)
+                if (calculatedFirsts.ContainsKey(symbol) == true)
                 {
-                    firstSet.UnionWith(_calculatedFirsts[symbol]);
+                    firstSet.UnionWith(calculatedFirsts[symbol]);
                     //firstSet.Add(symbol);
                 }
                 else
                 {
                     if (symbol.Type == SymbolType.Terminal || symbol.Type == SymbolType.Epsilon)
                     {
-                        _calculatedFirsts[symbol] = new HashSet<Symbol> { symbol };
+                        calculatedFirsts[symbol] = new HashSet<Symbol> { symbol };
                         firstSet.Add(symbol);
                     }
                     else
                     {
-                        foreach (var production in _productions[symbol])
+                        foreach (var production in productions[symbol])
                         {
                             var newFirstSet = new HashSet<Symbol>();
                             First(symbol, production.Product, newFirstSet);
@@ -250,8 +250,8 @@ namespace gcl2
                     }
                 }
 
-                if (_calculatedFirsts.ContainsKey(symbol) == false)
-                    _calculatedFirsts[symbol] = new HashSet<Symbol>(firstSet);
+                if (calculatedFirsts.ContainsKey(symbol) == false)
+                    calculatedFirsts[symbol] = new HashSet<Symbol>(firstSet);
                 if (firstSet.Contains(Epsilon) == true)
                     continue;
                 break;
@@ -262,9 +262,9 @@ namespace gcl2
         {
             foreach (var symbol in production.Product)
             {
-                if (_products.ContainsKey(symbol) == false)
-                    _products[symbol] = new HashSet<Production>();
-                _products[symbol].Add(production);
+                if (products.ContainsKey(symbol) == false)
+                    products[symbol] = new HashSet<Production>();
+                products[symbol].Add(production);
             }
         }
 
@@ -272,18 +272,18 @@ namespace gcl2
         {
             get
             {
-                return _productions[producer];
+                return productions[producer];
             }
         }
 
         public IEnumerator<List<Production>> GetEnumerator()
         {
-            return _productions.Select(production => production.Value).GetEnumerator();
+            return productions.Select(production => production.Value).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _productions.Select(production => production.Value).GetEnumerator();
+            return productions.Select(production => production.Value).GetEnumerator();
         }
     }
 }

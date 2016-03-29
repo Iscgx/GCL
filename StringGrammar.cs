@@ -13,18 +13,18 @@ namespace gcl2
     {
         public Grammar Grammar { get; private set; }
         public readonly Dictionary<string, Symbol> SymbolTable;
-        private readonly Dictionary<Attribute, Dictionary<Symbol, Symbol>> _symbolsByAttributes;
-        private Dictionary<Symbol, string> _nameBySymbol;
+        private readonly Dictionary<Attribute, Dictionary<Symbol, Symbol>> symbolsByAttributes;
+        private Dictionary<Symbol, string> nameBySymbol;
         public Dictionary<int, int> TokenDictionary { get; private set; }
         public List<string> TokenNames { get; private set; }
 
-        private bool _insideProduction;
-        private Symbol _currentProducer;
-        private List<Symbol> _currentProduct;
-        private readonly List<Attribute> _attributes;
-        private readonly DynamicCodeProvider _dynamicCode;
-        private readonly Dictionary<Production, string> _semanticMethods;
-        private string _currentSemanticMethod = null;
+        private bool insideProduction;
+        private Symbol currentProducer;
+        private List<Symbol> currentProduct;
+        private readonly List<Attribute> attributes;
+        private readonly DynamicCodeProvider dynamicCode;
+        private readonly Dictionary<Production, string> semanticMethods;
+        private string currentSemanticMethod = null;
 
         public StringGrammar(IEnumerable<string> tokenNames, DynamicCodeProvider dynamicCode, Dictionary<Production, string> semanticMethods)
         {
@@ -33,10 +33,10 @@ namespace gcl2
             TokenNames = tokenNames.ToList();
             TokenDictionary = new Dictionary<int, int>();
 
-            _attributes = new List<Attribute>();
-            _symbolsByAttributes = new Dictionary<Attribute, Dictionary<Symbol, Symbol>>();
-            _dynamicCode = dynamicCode;
-            _semanticMethods = semanticMethods;
+            attributes = new List<Attribute>();
+            symbolsByAttributes = new Dictionary<Attribute, Dictionary<Symbol, Symbol>>();
+            this.dynamicCode = dynamicCode;
+            this.semanticMethods = semanticMethods;
         }
 
         public void AddSymbolDefinition(Token token)
@@ -44,7 +44,7 @@ namespace gcl2
             var newToken = new Token(token.Type, token.Lexeme.Replace(@"\", ""), token.Message);
             if (token.CsharpCode == true)
             {
-                _currentSemanticMethod = _dynamicCode.AddMethod(token.Lexeme);
+                currentSemanticMethod = dynamicCode.AddMethod(token.Lexeme);
                 return;
             }
             if (token.Lexeme.StartsWith("#"))
@@ -52,30 +52,30 @@ namespace gcl2
                 var lexeme = token.Lexeme.Substring(1).Split(":".ToArray(), StringSplitOptions.RemoveEmptyEntries);
                 if (lexeme.Length == 1)
                 {
-                    _attributes.Add(new Attribute(lexeme[0]));
+                    attributes.Add(new Attribute(lexeme[0]));
                 }
                 else
                 {
                     var parseValue = 0;
                     var parsed = int.TryParse(lexeme[1], out parseValue);
                     if (parsed == true)
-                        _attributes.Add(new Attribute(lexeme[0], parseValue));
+                        attributes.Add(new Attribute(lexeme[0], parseValue));
                     else
-                        _attributes.Add(new Attribute(lexeme[0]));
+                        attributes.Add(new Attribute(lexeme[0]));
                 }
                 
                 return;
             }
-            if (token.Lexeme != "|" && token.Lexeme != ":" && _attributes.Count != 0 && SymbolTable.ContainsKey(newToken.Lexeme) == true)
+            if (token.Lexeme != "|" && token.Lexeme != ":" && attributes.Count != 0 && SymbolTable.ContainsKey(newToken.Lexeme) == true)
             {
-                foreach (var attribute in _attributes)
+                foreach (var attribute in attributes)
                 {
-                    if (_symbolsByAttributes.ContainsKey(attribute) == false)
-                        _symbolsByAttributes[attribute] = new Dictionary<Symbol, Symbol>();
-                    _symbolsByAttributes[attribute].Add(SymbolTable[newToken.Lexeme], SymbolTable[newToken.Lexeme]);
+                    if (symbolsByAttributes.ContainsKey(attribute) == false)
+                        symbolsByAttributes[attribute] = new Dictionary<Symbol, Symbol>();
+                    symbolsByAttributes[attribute].Add(SymbolTable[newToken.Lexeme], SymbolTable[newToken.Lexeme]);
                     SymbolTable[newToken.Lexeme].Properties.Add(attribute.Name, attribute);
                 }
-                _attributes.Clear();
+                attributes.Clear();
             }
             if (token.Lexeme != "|" && token.Lexeme != ":" && SymbolTable.ContainsKey(newToken.Lexeme) == false)
             {
@@ -88,57 +88,57 @@ namespace gcl2
                     var type = SymbolType.Terminal;
                     if (char.IsUpper(newToken.Lexeme.First()))
                         type = SymbolType.NonTerminal;
-                    var symbol = Grammar.NewSymbol(type, _attributes);
+                    var symbol = Grammar.NewSymbol(type, attributes);
                     SymbolTable.Add(newToken.Lexeme, symbol); //add symbol
                     //Console.WriteLine( "{0} : {1}",token.Lexeme, symbol.Id);
-                    foreach (var attribute in _attributes)
+                    foreach (var attribute in attributes)
                     {
-                        if (_symbolsByAttributes.ContainsKey(attribute) == false)
-                            _symbolsByAttributes[attribute] = new Dictionary<Symbol, Symbol>();
-                        _symbolsByAttributes[attribute].Add(symbol, symbol);
+                        if (symbolsByAttributes.ContainsKey(attribute) == false)
+                            symbolsByAttributes[attribute] = new Dictionary<Symbol, Symbol>();
+                        symbolsByAttributes[attribute].Add(symbol, symbol);
                     }
-                    _attributes.Clear();
+                    attributes.Clear();
                 }
             }
 
             if (token.Lexeme == ":")
             {
-                if (_insideProduction)
+                if (insideProduction)
                 {
-                    var production = new Production(_currentProducer, _currentProduct.ToArray());
-                    if (_currentSemanticMethod != null)
+                    var production = new Production(currentProducer, currentProduct.ToArray());
+                    if (currentSemanticMethod != null)
                     {
-                        _semanticMethods.Add(production, _currentSemanticMethod);
-                        _currentSemanticMethod = null;
+                        semanticMethods.Add(production, currentSemanticMethod);
+                        currentSemanticMethod = null;
                     }
-                    Grammar.Add(_currentProducer, production);
-                    _currentProduct.Clear();
+                    Grammar.Add(currentProducer, production);
+                    currentProduct.Clear();
                 }
-                _insideProduction = !_insideProduction;
+                insideProduction = !insideProduction;
             }
             else
             {
-                if (_insideProduction == false)
+                if (insideProduction == false)
                 {
-                    _currentProducer = SymbolTable[newToken.Lexeme];
-                    _currentProduct = new List<Symbol>();
+                    currentProducer = SymbolTable[newToken.Lexeme];
+                    currentProduct = new List<Symbol>();
                 }
                 else
                 {
                     if (token.Lexeme == "|")
                     {
-                        var production = new Production(_currentProducer, _currentProduct.ToArray());
-                        if (_currentSemanticMethod != null)
+                        var production = new Production(currentProducer, currentProduct.ToArray());
+                        if (currentSemanticMethod != null)
                         {
-                            _semanticMethods.Add(production, _currentSemanticMethod);
-                            _currentSemanticMethod = null;
+                            semanticMethods.Add(production, currentSemanticMethod);
+                            currentSemanticMethod = null;
                         }
-                        Grammar.Add(_currentProducer, production);
-                        _currentProduct.Clear();
+                        Grammar.Add(currentProducer, production);
+                        currentProduct.Clear();
                     }
                     else
                     {
-                        _currentProduct.Add(SymbolTable[newToken.Lexeme]);
+                        currentProduct.Add(SymbolTable[newToken.Lexeme]);
                     }
                 }
             }
@@ -146,7 +146,7 @@ namespace gcl2
 
         public void DefineTokens()
         {
-            _nameBySymbol = SymbolTable.ToDictionary(i => i.Value, i => i.Key);
+            nameBySymbol = SymbolTable.ToDictionary(i => i.Value, i => i.Key);
             for (var i = 0; i < TokenNames.Count; i++)
             {
                 var tokenName = TokenNames[i].Replace(@"\", "").Replace(@"'", "");
@@ -159,21 +159,21 @@ namespace gcl2
 
         public IEnumerable<KeyValuePair<Symbol, Symbol>> SymbolsByAttributeName(string name)
         {
-            if (name == null || _symbolsByAttributes.ContainsKey(new Attribute(name)) == false)
+            if (name == null || symbolsByAttributes.ContainsKey(new Attribute(name)) == false)
                 throw new ArgumentException();
-            return _symbolsByAttributes[new Attribute(name)].AsEnumerable();
+            return symbolsByAttributes[new Attribute(name)].AsEnumerable();
         }
 
         public Attribute AttributeBySymbolAndName(Symbol symbol, string name)
         {
-            if (name == null || _symbolsByAttributes.ContainsKey(new Attribute(name)) == false)
+            if (name == null || symbolsByAttributes.ContainsKey(new Attribute(name)) == false)
                 throw new ArgumentException();
-            return _symbolsByAttributes[new Attribute(name)][symbol].Properties[name];
+            return symbolsByAttributes[new Attribute(name)][symbol].Properties[name];
         }
 
         public string GetSymbolName(Symbol symbol)
         {
-            return _nameBySymbol[symbol];
+            return nameBySymbol[symbol];
         }
 
         public Symbol GetSymbolFromName(string name)

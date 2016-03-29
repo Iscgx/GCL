@@ -13,11 +13,11 @@ namespace Token_Analizer
     {
 
         //Field
-        private List<Automata> _automatas;
-        private int _string, _lowlevel, _cSharpCode, _error, _endOfFile, _newLine; //Index of string token type, lowlevel type and EOF token type
+        private List<Automata> automatas;
+        private int _string, lowlevel, cSharpCode, error, endOfFile, newLine; //Index of string token type, lowlevel type and EOF token type
         public List<string> TokenNames { get; private set; } //Token Names with corresponding ID (index)
-        private string _processedSourceCode;
-        private readonly string _tokenDefinitionCode;
+        private string processedSourceCode;
+        private readonly string tokenDefinitionCode;
         //private readonly string _sourceCode;
 
         public SendToken TokenCourier;
@@ -25,7 +25,7 @@ namespace Token_Analizer
         public Lexer(string tokenDefinitionCode/*, string sourceCode*/)
         {
             //if (!File.Exists(tokenDefinitionsFileName) || !File.Exists(sourceCodeFileName)) return;
-            _tokenDefinitionCode = tokenDefinitionCode;
+            this.tokenDefinitionCode = tokenDefinitionCode;
             //_sourceCode = sourceCode;
             InitAllAutomata();
         }
@@ -33,7 +33,7 @@ namespace Token_Analizer
         public void Start(string sourceCode)
         {
             PreProcessSourceCode(sourceCode);
-            ProcessSourceCode(_processedSourceCode);
+            ProcessSourceCode(processedSourceCode);
         }
 
         private void InitAllAutomata()
@@ -44,7 +44,7 @@ namespace Token_Analizer
             var tokenIndex = 0;
 
             //var fileLines = File.ReadAllLines("Tokens.txt");
-            var fileLines = _tokenDefinitionCode.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var fileLines = tokenDefinitionCode.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
             var stringMacro = "";
             var stringDefinition = "";
@@ -168,7 +168,7 @@ namespace Token_Analizer
             }
 
             //Take List of all automata
-            _automatas =
+            automatas =
                 TokenNames.Select(
                     tokenName =>
                     AutomataCreator.GetAutomataFrom(tokenRegexInt[tokenName].Item1, tokenRegexInt[tokenName].Item2,
@@ -180,16 +180,16 @@ namespace Token_Analizer
             _string = tokenIndex++;
             TokenNames.Add("string_value");
             tokenRegexInt["lowlevel"] = new Tuple<string, int>("@lowlevel{.*}@\"", tokenIndex);
-            _lowlevel = tokenIndex++;
+            lowlevel = tokenIndex++;
             TokenNames.Add("lowlevel");
             tokenRegexInt["cSharpCode"] = new Tuple<string, int>("\\{.*\\}", tokenIndex);
-            _cSharpCode = tokenIndex++;
+            cSharpCode = tokenIndex++;
             TokenNames.Add("cSharpCode");
             tokenRegexInt["error"] = new Tuple<string, int>("error", tokenIndex);
-            _error = tokenIndex++;
+            error = tokenIndex++;
             TokenNames.Add("error");
             tokenRegexInt["endOfFile"] = new Tuple<string, int>("endOfFile", tokenIndex);
-            _endOfFile = tokenIndex;
+            endOfFile = tokenIndex;
             TokenNames.Add("endOfFile");
         }
 
@@ -203,7 +203,7 @@ namespace Token_Analizer
             if (tokens == null) throw new ArgumentNullException("tokens");
             var matchedToken = false;
             //Check all automata
-            foreach (var automata in _automatas.Where(automata => automata.GetifFinal()))
+            foreach (var automata in automatas.Where(automata => automata.GetifFinal()))
             {
                 if (TokenCourier != null)
                 {
@@ -221,13 +221,13 @@ namespace Token_Analizer
                 if (text != "")
                 {
                     if (TokenCourier != null)
-                        TokenCourier(new Token(_error, text,
+                        TokenCourier(new Token(error, text,
                                                "Lexical error at line " + lineCount + ". Undefined token: \"" + text +
                                                "\""));
                 }
             }
 
-            foreach (var automata in _automatas)
+            foreach (var automata in automatas)
             {
                 automata.Reset();
             }
@@ -242,7 +242,7 @@ namespace Token_Analizer
             #region Tokenize all SourceCode
 
             //Init all automata.
-            foreach (var automaton in _automatas)
+            foreach (var automaton in automatas)
             {
                 automaton.Start();
             }
@@ -259,7 +259,7 @@ namespace Token_Analizer
                     if (!matchingString && !matchingLowLevel && !matchingCsharpCode)
                         CheckAllAutomata(tokens, lineCount, text);
                     else if (TokenCourier != null)
-                            TokenCourier(new Token(_error, temporalLexeme, "Lexical error at line " +lineCount + ". Undefined token: \"" + temporalLexeme + "\""));
+                            TokenCourier(new Token(error, temporalLexeme, "Lexical error at line " +lineCount + ". Undefined token: \"" + temporalLexeme + "\""));
                     continue;
                 }
 
@@ -308,7 +308,7 @@ namespace Token_Analizer
                             {
                                 //Not lowlevel, continue moving in automatas
                                 text += sourceCode[i];
-                                foreach (var automata in _automatas)
+                                foreach (var automata in automatas)
                                 {
                                     automata.Move(sourceCode[i]);
                                 }
@@ -324,7 +324,7 @@ namespace Token_Analizer
                             {
                                 //not string, continue moving in automatas
                                 text += sourceCode[i];
-                                foreach (var automata in _automatas)
+                                foreach (var automata in automatas)
                                 {
                                     automata.Move(sourceCode[i]);
                                 }
@@ -342,7 +342,7 @@ namespace Token_Analizer
                             {
                                 //not c sharp code, continue moving in automatas
                                 text += sourceCode[i];
-                                foreach (var automata in _automatas)
+                                foreach (var automata in automatas)
                                 {
                                     automata.Move(sourceCode[i]);
                                 } 
@@ -351,7 +351,7 @@ namespace Token_Analizer
                         default:
                             //Any character
                             text += sourceCode[i];
-                            foreach (var automata in _automatas)
+                            foreach (var automata in automatas)
                             {
                                 automata.Move(sourceCode[i]);
                             }
@@ -373,7 +373,7 @@ namespace Token_Analizer
                             {
                                 matchingLowLevel = false;
                                 if (TokenCourier != null)
-                                    TokenCourier(new Token(_lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
+                                    TokenCourier(new Token(lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
                                 i = j;
                             }
                             else
@@ -388,7 +388,7 @@ namespace Token_Analizer
                             {
                                 matchingLowLevel = false;
                                 if (TokenCourier != null)
-                                    TokenCourier(new Token(_lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
+                                    TokenCourier(new Token(lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
                                 i = j;
                             }
                             else
@@ -412,7 +412,7 @@ namespace Token_Analizer
                         i++;
                         matchingCsharpCode = false;
                         if (TokenCourier != null)
-                            TokenCourier(new Token(_cSharpCode, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture), true));
+                            TokenCourier(new Token(cSharpCode, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture), true));
                     }
                     else
                     {
@@ -439,7 +439,7 @@ namespace Token_Analizer
             #endregion
 
             if (TokenCourier != null)
-                TokenCourier(new Token(_endOfFile, "endOfFile", lineCount.ToString(CultureInfo.InvariantCulture)));
+                TokenCourier(new Token(endOfFile, "endOfFile", lineCount.ToString(CultureInfo.InvariantCulture)));
         }
 
         private void PreProcessSourceCode(string sourceCode)
@@ -672,7 +672,7 @@ namespace Token_Analizer
 
                 #endregion
 
-                _processedSourceCode = process;
+                processedSourceCode = process;
         }
     }
 }

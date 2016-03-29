@@ -5,22 +5,22 @@ namespace gcl2.Dynamic
 {
     public class CompiledClass
     {
-        private readonly Assembly _compiledAssembly;
-        private readonly object _instance;
-        private readonly Type _classType;
+        private readonly Assembly compiledAssembly;
+        private readonly object instance;
+        private readonly Type classType;
 
         public CompiledClass(Assembly compiledAssembly, params object[] parameters)
         {
-            _compiledAssembly = compiledAssembly;
-            _classType = _compiledAssembly.GetType("DynamicCode");
-            _instance = Activator.CreateInstance(_classType, parameters);
+            this.compiledAssembly = compiledAssembly;
+            classType = this.compiledAssembly.GetType("DynamicCode");
+            instance = Activator.CreateInstance(classType, parameters);
         }
 
         public void Call(string methodName, params object[] parameters)
         {
             try
             {
-                _classType.GetMethod(methodName).Invoke(_instance, parameters);
+                classType.GetMethod(methodName).Invoke(instance, parameters);
             }
             catch (Exception e)
             {
