@@ -7,49 +7,49 @@ namespace Semantic
 {
     public class GclCodeGenerator
     {
-        private readonly StringBuilder _builder;
+        private readonly StringBuilder builder;
 
-        public GclCodeGenerator(int size)
+        public GclCodeGenerator()
         {
-            _builder = new StringBuilder(size);
+            builder = new StringBuilder(10000);
             
-            _builder.Append("#include <iostream>\n" +
-                            "#include <vector>\n" +
-                            "#include <cuda_runtime.h>\n\n" +
-                            "#pragma comment(lib, \"cudart\")\n\n" +
-                            "using namespace std;\n");
+            builder.Append("#include <iostream>\n" +
+                           "#include <vector>\n" +
+                           "#include <cuda_runtime.h>\n\n" +
+                           "#pragma comment(lib, \"cudart\")\n\n" +
+                           "using namespace std;\n");
 
-            _builder.Append("\ndouble Pow(double _base, double _pow)\n" +
-                            "{\n\tif(_pow <= 0) return 1;\n" +
-                            "\tint i = 0;\n" +
-                            "\tfor (i = 0; i < _pow; i++)\n" +
-                            "\t\t_base *= _base;\n" +
-                            "\treturn _base;\n}\n\n");
+            builder.Append("\ndouble Pow(double _base, double _pow)\n" +
+                           "{\n\tif(_pow <= 0) return 1;\n" +
+                           "\tint i = 0;\n" +
+                           "\tfor (i = 0; i < _pow; i++)\n" +
+                           "\t\t_base *= _base;\n" +
+                           "\treturn _base;\n}\n\n");
 
-            _builder.Append("\n__device__ double D_Pow(double _base, double _pow)\n" +
-                            "{\n\tif(_pow <= 0) return 1;\n" +
-                            "\tint i = 0;\n" +
-                            "\tfor (i = 0; i < _pow; i++)\n" +
-                            "\t\t_base *= _base;\n" +
-                            "\treturn _base;\n}\n\n");
+            builder.Append("\n__device__ double D_Pow(double _base, double _pow)\n" +
+                           "{\n\tif(_pow <= 0) return 1;\n" +
+                           "\tint i = 0;\n" +
+                           "\tfor (i = 0; i < _pow; i++)\n" +
+                           "\t\t_base *= _base;\n" +
+                           "\treturn _base;\n}\n\n");
         }
 
         public void AddCode(string partialCode)
         {
-            _builder.Append(partialCode);
+            builder.Append(partialCode);
         }
 
         public void AddTabs(int tabs)
         {
             for (int i = 0; i < tabs; i++)
             {
-                _builder.Append("\t");
+                builder.Append("\t");
             }
         }
 
-        public void End()
+        public string End()
         {
-            var _debugString = _builder.ToString();
+           return builder.ToString();
         }
     }
 }

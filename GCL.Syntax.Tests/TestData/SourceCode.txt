@@ -1,0 +1,36 @@
+@device{
+	int d_a[1024];
+	int d_b[1024];
+	public map mapeishon(int [*] input, int [*] output)
+	{
+		output[x] = input[x] * input[x];
+	}
+
+}
+@host{
+
+	int main()
+	{
+		int a[2048];
+		int b[2048];
+
+		@lowlevel{
+		cudaMalloc(&d_a,4096);
+		cudaMalloc(&d_b,4096);
+		}@
+
+		for(int i = 0;i < 1024;i++)
+			a[i] = i;
+
+		d_a = @a;
+		
+		mapeishon(d_a, d_b);
+		
+		b = @d_b;
+
+		@lowlevel{
+		for(int i = 0;i < 1024;i++)
+			cout << i << ") " << b[i] << endl;
+		}@
+	}
+}

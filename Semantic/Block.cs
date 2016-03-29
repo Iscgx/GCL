@@ -7,7 +7,7 @@ namespace Semantic
 {
     class Block
     {
-        private uint _tempVal;
+        private uint tempVal;
         public Dictionary<string,Variable> Variables { get; set; }
         public Dictionary<string,StructureType> Structures { get; set; }
         
@@ -36,8 +36,8 @@ namespace Semantic
 
         public string GetNextTempName()
         {
-            var r = "Temp_" + _tempVal;
-            _tempVal += 1;
+            var r = "Temp_" + tempVal;
+            tempVal += 1;
             return r;
         }
     }
