@@ -14,7 +14,7 @@ namespace GCL.Syntax
             var sourceTokens = File.ReadAllText(@"Tokens.txt");
             var grammarCode = File.ReadAllText(@"GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"GrammarTokens.txt");
-            var codeParser = new CodeParser(sourceTokens, grammarCode, new Lexer(grammarTokens), new GclCodeGenerator(), new DynamicCodeProvider(), new SemanticAnalysis());
+            var codeParser = new CodeParser(new Lexer(sourceTokens), grammarCode, new Lexer(grammarTokens), new GclCodeGenerator(), new DynamicCodeProvider(), new SemanticAnalysis());
             codeParser.Parse(sourceCode);
             Console.ReadLine();
         }

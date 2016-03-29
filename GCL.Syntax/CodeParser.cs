@@ -37,11 +37,11 @@ namespace GCL.Syntax
         public OnSintacticalError OnSintacticalError;
 
         public CodeParser(
-            string tokensCode, 
-            string codeGrammar, 
-            ILexer readGrammarLexer, 
+            ILexer codeLexer, 
+            string codeGrammar,
+            ILexer readGrammarLexer,
             GclCodeGenerator gclCodeGenerator, 
-            DynamicCodeProvider dynamicCodeProvider, 
+            DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis)
         {
             var then = DateTime.Now;
@@ -53,7 +53,7 @@ namespace GCL.Syntax
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
             this.semanticAnalysis = semanticAnalysis;
-            this.lexer = new Lexer(tokensCode);
+            this.lexer = codeLexer;
             stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
 
             readGrammarLexer.TokenCourier += stringGrammar.AddSymbolDefinition;
@@ -74,7 +74,8 @@ namespace GCL.Syntax
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
             try
             {
-                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider, "Semantic.dll", "Microsoft.CSharp.dll", "System.Core.dll", "System.dll", "System.Collections.dll");
+                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider, "Semantic.dll",
+                    "Microsoft.CSharp.dll", "System.Core.dll", "System.dll", "System.Collections.dll");
             }
             catch (Exception)
             {
@@ -82,7 +83,7 @@ namespace GCL.Syntax
             }
             Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
-        
+
         public void Parse(string code)
         {
             nodeStack.Clear();
