@@ -36,23 +36,22 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(string tokensCode, string codeGrammar, ILexer readGrammarLexer, GclCodeGenerator gclCodeGenerator)
+        public CodeParser(string tokensCode, string codeGrammar, ILexer readGrammarLexer, GclCodeGenerator gclCodeGenerator, DynamicCodeProvider dynamicCodeProvider)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
-            var dynamicCode = new DynamicCodeProvider();
             semantic = new SemanticAnalysis();
             
             productionSymbols = new List<Symbol>();
-            dynamicCode.AddToScope(semantic, "semantic");
-            dynamicCode.AddToScope(productionSymbols, "element");
-            dynamicCode.AddToScope(semantic.ThrowError, "ThrowError");
+            dynamicCodeProvider.AddToScope(semantic, "semantic");
+            dynamicCodeProvider.AddToScope(productionSymbols, "element");
+            dynamicCodeProvider.AddToScope(semantic.ThrowError, "ThrowError");
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
-            dynamicCode.AddToScope(atDevice, "AtDevice");
-            dynamicCode.AddToScope(cudaDefined, "CudaDefined");
+            dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
+            dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
             this.lexer = new Lexer(tokensCode);
-            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCode, semanticMethods);
+            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
             nodeStack = new Stack<int>();
             nodeStack.Push(0);
             temporalStack = new Stack<Symbol>();
@@ -64,12 +63,12 @@ namespace GCL.Syntax
             this.lexer.TokenCourier += ParseToken;
 
             codeGenerator = gclCodeGenerator;
-            dynamicCode.AddToScope(codeGenerator, "codegen");
+            dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
 
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
             try
             {
-                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCode, "Semantic.dll", "Microsoft.CSharp.dll", "System.Core.dll", "System.dll", "System.Collections.dll");
+                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider, "Semantic.dll", "Microsoft.CSharp.dll", "System.Core.dll", "System.dll", "System.Collections.dll");
             }
             catch (Exception)
             {

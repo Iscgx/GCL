@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using GCL.Syntax.Dynamic;
 using Semantic;
 using Token_Analizer;
 
@@ -13,7 +14,7 @@ namespace GCL.Syntax
             var sourceTokens = File.ReadAllText(@"Tokens.txt");
             var grammarCode = File.ReadAllText(@"GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"GrammarTokens.txt");
-            var codeParser = new CodeParser(sourceTokens, grammarCode, new Lexer(grammarTokens), new GclCodeGenerator());
+            var codeParser = new CodeParser(sourceTokens, grammarCode, new Lexer(grammarTokens), new GclCodeGenerator(), new DynamicCodeProvider());
             codeParser.Parse(sourceCode);
             Console.ReadLine();
         }
