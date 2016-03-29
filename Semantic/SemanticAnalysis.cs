@@ -6,32 +6,32 @@ namespace Semantic
 {
     public partial class SemanticAnalysis
     {
-        private readonly GlobalSymbolTable _globalSymbolTable;
-        private Function _actualFunction;
-        private readonly List<Block> _blocks;
+        private readonly GlobalSymbolTable globalSymbolTable;
+        private Function actualFunction;
+        private readonly List<Block> blocks;
 
         //HardCoded Types
         public readonly Dictionary<string, Type> DefinedTypes;
-        private readonly Dictionary<string, StructureType> _definedStructures; 
-        private readonly Dictionary<string, ArrayType> _definedArrays; 
+        private readonly Dictionary<string, StructureType> definedStructures; 
+        private readonly Dictionary<string, ArrayType> definedArrays; 
 
-        private readonly Dictionary<Type, string> _stringByType; 
+        private readonly Dictionary<Type, string> stringByType; 
         public bool SemanticError = false;
         public ThrowErrorDelegate ThrowError;
 
         public string GetTypeName(Type type)
         {
-            if (_stringByType.ContainsKey(type))
-                return _stringByType[type];
+            if (stringByType.ContainsKey(type))
+                return stringByType[type];
             else
                 return "error";
         }
 
         public SemanticAnalysis()
         {
-            _globalSymbolTable = new GlobalSymbolTable();
+            globalSymbolTable = new GlobalSymbolTable();
             //_actualFunction = null;
-            _blocks = new List<Block>();
+            blocks = new List<Block>();
             ThrowError += Error;
 
             DefinedTypes = new Dictionary<string, Type>
@@ -49,11 +49,11 @@ namespace Semantic
                     {"unsigned_short_int", new Type(2, 3, TypeParameters.IsInteger | TypeParameters.IsUnsigned)},
                     {"unsigned_long_int", new Type(8, 5, TypeParameters.IsInteger | TypeParameters.IsUnsigned)}
                 };
-            _definedStructures = new Dictionary<string, StructureType>();
-            _definedArrays = new Dictionary<string, ArrayType>();
-            _stringByType = new Dictionary<Type, string>();
+            definedStructures = new Dictionary<string, StructureType>();
+            definedArrays = new Dictionary<string, ArrayType>();
+            stringByType = new Dictionary<Type, string>();
             foreach (var definedType in DefinedTypes)
-                _stringByType.Add(definedType.Value, definedType.Key);
+                stringByType.Add(definedType.Value, definedType.Key);
             //HardCoded Types
         }
 
@@ -66,17 +66,17 @@ namespace Semantic
 
         public int BlocksOpened()
         {
-            return _blocks.Count;
+            return blocks.Count;
         }
 
         public void CloseFunction()
         {
-            _actualFunction = null;
+            actualFunction = null;
         }
 
         public void CheckReturnType(string type)
         {
-            if (_actualFunction.ReturnType.Equals(type) == false)
+            if (actualFunction.ReturnType.Equals(type) == false)
                 Error("Return Type Expression doesn't match Function's return type");
         }
 
@@ -90,15 +90,15 @@ namespace Semantic
         {
             ISymbolTable globalTable;
             if (atDevice)
-                globalTable = _globalSymbolTable.DeviceSymbolTable;
+                globalTable = globalSymbolTable.DeviceSymbolTable;
             else
-                globalTable = _globalSymbolTable;
+                globalTable = globalSymbolTable;
 
-            if (_blocks.Any())
+            if (blocks.Any())
             {
-                for (var i = _blocks.Count() - 1; i >= 0; i--)
+                for (var i = blocks.Count() - 1; i >= 0; i--)
                 {
-                    if (_blocks[i].Variables.ContainsKey(name) && _blocks[i].Variables[name].Type.Parameters != TypeParameters.IsStructure) //Variable found!!
+                    if (blocks[i].Variables.ContainsKey(name) && blocks[i].Variables[name].Type.Parameters != TypeParameters.IsStructure) //Variable found!!
                         return true;
                 }
             }
@@ -114,14 +114,14 @@ namespace Semantic
         public string StructureInstanceExists(string structureInstanceName, Stack<string> structureField, bool atDevice)
         {
             var fieldList = structureField.ToList();
-            if (_blocks.Any())
+            if (blocks.Any())
             {
-                for (var i = _blocks.Count() - 1; i >= 0; i--)
+                for (var i = blocks.Count() - 1; i >= 0; i--)
                 {
-                    if (_blocks[i].Variables.ContainsKey(structureInstanceName) &&
-                        (_blocks[i].Variables[structureInstanceName].Type.Parameters & TypeParameters.IsStructure) == TypeParameters.IsStructure)
+                    if (blocks[i].Variables.ContainsKey(structureInstanceName) &&
+                        (blocks[i].Variables[structureInstanceName].Type.Parameters & TypeParameters.IsStructure) == TypeParameters.IsStructure)
                     {
-                        var structure = _definedStructures[_stringByType[_blocks[i].Variables[structureInstanceName].Type]];
+                        var structure = definedStructures[stringByType[blocks[i].Variables[structureInstanceName].Type]];
                         for (var j = 0; j < fieldList.Count;j++)
                         {
                             if (!structure.Variables.ContainsKey(fieldList[j])) continue;
@@ -129,18 +129,18 @@ namespace Semantic
                                 if (variable.Type.Parameters != TypeParameters.IsStructure && j < fieldList.Count() - 1)
                                     return null;
                                 if(j < fieldList.Count - 1 &&
-                                    _definedStructures.ContainsKey(_stringByType[variable.Type]))
-                                    structure = _definedStructures[_stringByType[variable.Type]];
+                                    definedStructures.ContainsKey(stringByType[variable.Type]))
+                                    structure = definedStructures[stringByType[variable.Type]];
                             }
                         if (structure.Variables.ContainsKey(fieldList[fieldList.Count - 1]))
-                            return _stringByType[structure.Variables[fieldList[fieldList.Count - 1]].Type];
+                            return stringByType[structure.Variables[fieldList[fieldList.Count - 1]].Type];
                     }
                 }
             }
-            if (_globalSymbolTable.Variables.ContainsKey(structureInstanceName) &&
-                    (_globalSymbolTable.Variables[structureInstanceName].Type.Parameters & TypeParameters.IsStructure) == TypeParameters.IsStructure)
+            if (globalSymbolTable.Variables.ContainsKey(structureInstanceName) &&
+                    (globalSymbolTable.Variables[structureInstanceName].Type.Parameters & TypeParameters.IsStructure) == TypeParameters.IsStructure)
             {
-                var structure = _definedStructures[_stringByType[_globalSymbolTable.Variables[structureInstanceName].Type]];
+                var structure = definedStructures[stringByType[globalSymbolTable.Variables[structureInstanceName].Type]];
                 for (var j = 0; j < fieldList.Count; j++)
                 {
                     if (!structure.Variables.ContainsKey(fieldList[j])) continue;
@@ -148,11 +148,11 @@ namespace Semantic
                         if (variable.Type.Parameters != TypeParameters.IsStructure && j < fieldList.Count() - 1)
                             return null;
                         if (j < fieldList.Count - 1 &&
-                            _definedStructures.ContainsKey(_stringByType[variable.Type]))
-                            structure = _definedStructures[_stringByType[variable.Type]];
+                            definedStructures.ContainsKey(stringByType[variable.Type]))
+                            structure = definedStructures[stringByType[variable.Type]];
                     }
                 if (structure.Variables.ContainsKey(fieldList[fieldList.Count - 1]))
-                    return _stringByType[structure.Variables[fieldList[fieldList.Count - 1]].Type];
+                    return stringByType[structure.Variables[fieldList[fieldList.Count - 1]].Type];
             }
 
             return "error"; //Variable not found
@@ -174,9 +174,9 @@ namespace Semantic
                 }
             }
             var structure = new StructureType(structureName, structureVariables, atDevice);
-            if (_blocks.Any())
+            if (blocks.Any())
             {
-                if (_blocks[_blocks.Count() - 1].AddVariable(structure) == false) //Already exists
+                if (blocks[blocks.Count() - 1].AddVariable(structure) == false) //Already exists
                 {
                     Error("Previously defined structure \"{0}\"", structureName);
                     return;
@@ -184,14 +184,14 @@ namespace Semantic
             }
             else
             {
-                if (_globalSymbolTable.AddVariable(structure) == false) //Already exists
+                if (globalSymbolTable.AddVariable(structure) == false) //Already exists
                 {
                     Error("Previously defined structure \"{0}\"", structureName);
                     return;
                 }
             }
-            _definedStructures.Add(structureName, structure);
-            _stringByType.Add(structure, structureName);
+            definedStructures.Add(structureName, structure);
+            stringByType.Add(structure, structureName);
             DefinedTypes.Add(structureName, structure);
         }
 
@@ -203,9 +203,9 @@ namespace Semantic
 
             if (DefinedTypes.ContainsKey(type))
             {
-                if (_blocks.Any())
+                if (blocks.Any())
                 {
-                    var block = _blocks[_blocks.Count() - 1];
+                    var block = blocks[blocks.Count() - 1];
 
                     if (block.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name); //Already exists
@@ -214,10 +214,10 @@ namespace Semantic
                 }
                 else
                 {
-                    if (_globalSymbolTable.HasVariable(variable))
+                    if (globalSymbolTable.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name); //Already exists 
                     else
-                        _globalSymbolTable.AddVariable(variable);
+                        globalSymbolTable.AddVariable(variable);
                 }
 
             }
@@ -228,18 +228,18 @@ namespace Semantic
 
         public Function GetFunction(string name)
         {
-            if (_globalSymbolTable.Functions.ContainsKey(name))
-                return _globalSymbolTable.Functions[name];
-            else if(_globalSymbolTable.DeviceSymbolTable.Functions.ContainsKey(name))
-                return _globalSymbolTable.DeviceSymbolTable.Functions[name];
+            if (globalSymbolTable.Functions.ContainsKey(name))
+                return globalSymbolTable.Functions[name];
+            else if(globalSymbolTable.DeviceSymbolTable.Functions.ContainsKey(name))
+                return globalSymbolTable.DeviceSymbolTable.Functions[name];
             else return null;
         }
 
         public void AddFunction(string name, string returnType, bool atDevice, params Type[] parameters)
         {
             var function = new Function(name, parameters.ToList(), returnType, atDevice);
-            _actualFunction = function;
-            if(_globalSymbolTable.AddFunction(name, function) == false) //Already Declared Function
+            actualFunction = function;
+            if(globalSymbolTable.AddFunction(name, function) == false) //Already Declared Function
             {
                 Error("Already Declared Function with name {0}.", name);
             }
@@ -247,18 +247,18 @@ namespace Semantic
 
         public void NewBlock()
         {
-            _blocks.Add(new Block());
+            blocks.Add(new Block());
         }
 
         public void CloseBlock()
         {
-            var blockToRemove = _blocks.ElementAt(_blocks.Count() - 1);
+            var blockToRemove = blocks.ElementAt(blocks.Count() - 1);
 
             foreach (var structure in blockToRemove.Structures)
             {
                 DefinedTypes.Remove(structure.Key);
-                _definedStructures.Remove(structure.Key);
-                _stringByType.Remove(structure.Value);
+                definedStructures.Remove(structure.Key);
+                stringByType.Remove(structure.Value);
             }
 
             /*foreach (var variable in blockToRemove.Variables)
@@ -269,7 +269,7 @@ namespace Semantic
                 _definedArrays.Remove(variable.Key);
                 _stringByType.Remove(variable.Value.);
             }*/
-            _blocks.Remove(blockToRemove);
+            blocks.Remove(blockToRemove);
         }
 
         public void AddConstant(string type, string name, bool atDevice)
@@ -278,9 +278,9 @@ namespace Semantic
 
             if (DefinedTypes.ContainsKey(type))
             {
-                if (_blocks.Any())
+                if (blocks.Any())
                 {
-                    var block = _blocks[_blocks.Count() - 1];
+                    var block = blocks[blocks.Count() - 1];
 
                     if (block.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name); //Already exists
@@ -289,10 +289,10 @@ namespace Semantic
                 }
                 else
                 {
-                    if (_globalSymbolTable.HasVariable(variable))
+                    if (globalSymbolTable.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name); //Already exists 
                     else
-                        _globalSymbolTable.AddVariable(variable);
+                        globalSymbolTable.AddVariable(variable);
                 }
 
             }
@@ -342,28 +342,28 @@ namespace Semantic
         {
             ISymbolTable globalTable;
             if (atDevice)
-                globalTable = _globalSymbolTable.DeviceSymbolTable;
+                globalTable = globalSymbolTable.DeviceSymbolTable;
             else
-                globalTable = _globalSymbolTable;
+                globalTable = globalSymbolTable;
 
             if (VariableExists(name, atDevice))
             {
-                if (_blocks.Any())
+                if (blocks.Any())
                 {
-                    for (int i = _blocks.Count() - 1; i >= 0; i--)
+                    for (int i = blocks.Count() - 1; i >= 0; i--)
                     {
-                        if(_blocks[i].Variables.ContainsKey(name))
+                        if(blocks[i].Variables.ContainsKey(name))
                         {
-                            if (_stringByType.ContainsKey(_blocks[i].Variables[name].Type))
-                                return _stringByType[_blocks[i].Variables[name].Type];
+                            if (stringByType.ContainsKey(blocks[i].Variables[name].Type))
+                                return stringByType[blocks[i].Variables[name].Type];
                             else return "error";
                         }
                     }
                 }
                 if (globalTable.Variables.ContainsKey(name))
                 {
-                    if(_stringByType.ContainsKey(globalTable.Variables[name].Type))
-                        return _stringByType[globalTable.Variables[name].Type];
+                    if(stringByType.ContainsKey(globalTable.Variables[name].Type))
+                        return stringByType[globalTable.Variables[name].Type];
                     else return "error";
                 }
             }
@@ -381,27 +381,27 @@ namespace Semantic
         {
             ISymbolTable globalTable;
             if (atDevice)
-                globalTable = _globalSymbolTable.DeviceSymbolTable;
+                globalTable = globalSymbolTable.DeviceSymbolTable;
             else
-                globalTable = _globalSymbolTable;
+                globalTable = globalSymbolTable;
 
             if (VariableExists(variableName, atDevice))
             {
-                if (_blocks.Any())
+                if (blocks.Any())
                 {
-                    for (int i = _blocks.Count() - 1; i >= 0; i--)
+                    for (int i = blocks.Count() - 1; i >= 0; i--)
                     {
-                        if (_blocks[i].Variables.ContainsKey(variableName))
+                        if (blocks[i].Variables.ContainsKey(variableName))
                         {
-                            if (_stringByType.ContainsKey(_blocks[i].Variables[variableName].Type))
-                                return _blocks[i].Variables[variableName].Type;
+                            if (stringByType.ContainsKey(blocks[i].Variables[variableName].Type))
+                                return blocks[i].Variables[variableName].Type;
                             return null;
                         }
                     }
                 }
                 if (globalTable.Variables.ContainsKey(variableName))
                 {
-                    if (_stringByType.ContainsKey(globalTable.Variables[variableName].Type))
+                    if (stringByType.ContainsKey(globalTable.Variables[variableName].Type))
                         return globalTable.Variables[variableName].Type;
                     return null;
                 }
@@ -412,7 +412,7 @@ namespace Semantic
         public bool DeclaredInDevice(string variableName)
         {
             //Host call
-            if (_globalSymbolTable.DeviceSymbolTable.Variables.ContainsKey(variableName))
+            if (globalSymbolTable.DeviceSymbolTable.Variables.ContainsKey(variableName))
                 return true;
             else return false;
         }
@@ -427,7 +427,7 @@ namespace Semantic
 
         public string GetNextTempName()
         {
-            return _blocks[_blocks.Count - 1].GetNextTempName();
+            return blocks[blocks.Count - 1].GetNextTempName();
         }
 
         public bool VariableExists(string name, bool atDevice)
