@@ -40,10 +40,11 @@ namespace GCL.Syntax
             GclCodeGenerator gclCodeGenerator,
             DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis,
-            IEnumerable<Token> grammarTokens)
+            IEnumerable<Token> grammarTokens,
+            Dictionary<Production, string> semanticMethods)
         {
             var then = DateTime.Now;
-            semanticMethods = new Dictionary<Production, string>();
+            this.semanticMethods = semanticMethods;
             nodeStack = new Stack<int>();
             nodeStack.Push(0);
             temporalStack = new Stack<Symbol>();
@@ -51,7 +52,7 @@ namespace GCL.Syntax
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
             this.semanticAnalysis = semanticAnalysis;
-            stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods);
+            stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, this.semanticMethods);
 
             foreach (var token in grammarTokens)
             {

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using GCL.Lex;
+using GCL.Syntax.Data;
 using GCL.Syntax.Dynamic;
 using Semantic;
 
@@ -18,7 +20,7 @@ namespace GCL.Syntax
             var codeParser = new CodeParser(new Lexer(sourceTokens),
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
-                new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode));
+                new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode), new Dictionary<Production, string>());
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             Console.ReadLine();
         }

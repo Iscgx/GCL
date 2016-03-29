@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using GCL.Lex;
 using GCL.Syntax;
+using GCL.Syntax.Data;
 using GCL.Syntax.Dynamic;
 using Semantic;
 using Xunit;
@@ -30,7 +31,7 @@ namespace Syntax.Tests
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
                 new SemanticAnalysis(),
-                readGrammarLexer.Parse(grammarCode));
+                readGrammarLexer.Parse(grammarCode), new Dictionary<Production, string>());
             var code = codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             code.Length.Should().Be(415);
         }
@@ -46,7 +47,7 @@ namespace Syntax.Tests
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
                 new SemanticAnalysis(),
-                readGrammarLexer.Parse(grammarCode));
+                readGrammarLexer.Parse(grammarCode), new Dictionary<Production, string>());
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
         }
     }
