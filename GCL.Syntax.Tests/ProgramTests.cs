@@ -30,8 +30,7 @@ namespace Syntax.Tests
             ILexer codeLexer = new Lexer(sourceTokens);
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
             var semanticMethods = new Dictionary<Production, string>();
-            var codeParser = new CodeParser(codeLexer,
-                new GclCodeGenerator(),
+            var codeParser = new CodeParser(new GclCodeGenerator(),
                 dynamicCodeProvider,
                 new SemanticAnalysis(),
                 readGrammarLexer.Parse(grammarCode),
@@ -51,8 +50,7 @@ namespace Syntax.Tests
             ILexer codeLexer = new Lexer(sourceTokens);
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
             var semanticMethods = new Dictionary<Production, string>();
-            var codeParser = new CodeParser(codeLexer,
-                new GclCodeGenerator(),
+            var codeParser = new CodeParser(new GclCodeGenerator(),
                 dynamicCodeProvider,
                 new SemanticAnalysis(),
                 readGrammarLexer.Parse(grammarCode),

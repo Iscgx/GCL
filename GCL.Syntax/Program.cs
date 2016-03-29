@@ -21,8 +21,7 @@ namespace GCL.Syntax
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
             var semanticMethods = new Dictionary<Production, string>();
 
-            var codeParser = new CodeParser(codeLexer,
-                new GclCodeGenerator(),
+            var codeParser = new CodeParser(new GclCodeGenerator(),
                 dynamicCodeProvider,
                 new SemanticAnalysis(),
                 readGrammarLexer.Parse(grammarCode),

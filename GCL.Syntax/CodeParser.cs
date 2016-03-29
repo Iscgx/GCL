@@ -35,9 +35,7 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(
-            ILexer codeLexer,
-            GclCodeGenerator gclCodeGenerator,
+        public CodeParser(GclCodeGenerator gclCodeGenerator,
             DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis,
             IEnumerable<Token> grammarTokens,
