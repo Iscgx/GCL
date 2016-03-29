@@ -7,8 +7,6 @@ namespace GCL.Lex
     {
         List<string> TokenNames { get; }
 
-        Action<Token> TokenCourier { get; set; }
-
-        void Start(string sourceCode);
+        IEnumerable<Token> Parse(string sourceCode);
     }
 }

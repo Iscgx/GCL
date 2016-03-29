@@ -56,12 +56,13 @@ namespace GCL.Syntax
             this.lexer = codeLexer;
             stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
 
-            readGrammarLexer.TokenCourier += stringGrammar.AddSymbolDefinition;
+            foreach (var token in readGrammarLexer.Parse(codeGrammar))
+            {
+                stringGrammar.AddSymbolDefinition(token);
+            }
 
-            readGrammarLexer.Start(codeGrammar);
             stringGrammar.DefineTokens();
             parser = new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
-            this.lexer.TokenCourier += ParseToken;
 
             codeGenerator = gclCodeGenerator;
             dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
@@ -93,7 +94,10 @@ namespace GCL.Syntax
             nodeStack.Clear();
             nodeStack.Push(0);
             temporalStack.Clear();
-            lexer.Start(code);
+            foreach (var token in lexer.Parse(code))
+            {
+                ParseToken(token);
+            }
             return codeGenerator.End();
         }
 

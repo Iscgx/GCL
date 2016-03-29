@@ -18,12 +18,9 @@ namespace GCL.Lex.Tests
 
             var lexer = new Lexer(grammarTokens);
 
-            var tokenDispatchCount = 0;
-            lexer.TokenCourier += _ => tokenDispatchCount++;
-            lexer.Start(File.ReadAllText(@"TestData\SourceCode.txt"));
+            lexer.Parse(File.ReadAllText(@"TestData\SourceCode.txt"));
 
             lexer.TokenNames.Count().Should().Be(84);
-            tokenDispatchCount.Should().Be(205);
         }
         [Fact]
         public void A_lexer_can_parse_an_return_an_enumerable_of_tokens()
@@ -31,8 +28,6 @@ namespace GCL.Lex.Tests
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
 
             var lexer = new Lexer(grammarTokens);
-
-            lexer.Start(File.ReadAllText(@"TestData\SourceCode.txt"));
 
             lexer.TokenNames.Count().Should().Be(84);
             lexer.Parse(File.ReadAllText(@"TestData\SourceCode.txt")).Count().Should().Be(205);

@@ -57,9 +57,9 @@ namespace Syntax.Tests
 
         public Action<Token> TokenCourier { get; set; }
 
-        public void Start(string sourceCode)
+        public IEnumerable<Token> Parse(string sourceCode)
         {
-            
+            return Enumerable.Empty<Token>();
         }
     }
 }
