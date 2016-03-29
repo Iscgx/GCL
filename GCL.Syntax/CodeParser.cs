@@ -36,7 +36,7 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(string tokensCode, string codeGrammar, ILexer readGrammarLexer)
+        public CodeParser(string tokensCode, string codeGrammar, ILexer readGrammarLexer, GclCodeGenerator gclCodeGenerator)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
@@ -63,7 +63,7 @@ namespace GCL.Syntax
             parser = new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
             this.lexer.TokenCourier += ParseToken;
 
-            codeGenerator = new GclCodeGenerator();
+            codeGenerator = gclCodeGenerator;
             dynamicCode.AddToScope(codeGenerator, "codegen");
 
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
