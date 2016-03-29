@@ -6,21 +6,15 @@ using System.Linq;
 
 namespace Token_Analizer
 {
-
-    public delegate void SendToken(Token token);
-
     public class Lexer
     {
+        public List<string> TokenNames { get; private set; } //Token Names with corresponding ID (index)
+        public Action<Token> TokenCourier;
 
-        //Field
         private List<Automata> automatas;
         private int _string, lowlevel, cSharpCode, error, endOfFile, newLine; //Index of string token type, lowlevel type and EOF token type
-        public List<string> TokenNames { get; private set; } //Token Names with corresponding ID (index)
         private string processedSourceCode;
         private readonly string tokenDefinitionCode;
-        //private readonly string _sourceCode;
-
-        public SendToken TokenCourier;
 
         public Lexer(string tokenDefinitionCode/*, string sourceCode*/)
         {
