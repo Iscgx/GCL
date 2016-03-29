@@ -56,10 +56,8 @@ namespace GCL.Syntax
             this.parser = parser;
 
             codeGenerator = gclCodeGenerator;
-            dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
-            dynamicCodeProvider.AddToScope(this.semanticAnalysis, "semantic");
+
             dynamicCodeProvider.AddToScope(productionSymbols, "element");
-            dynamicCodeProvider.AddToScope(this.semanticAnalysis.ThrowError, "ThrowError");
             dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
             dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
 

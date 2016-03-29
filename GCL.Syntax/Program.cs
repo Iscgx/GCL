@@ -30,9 +30,16 @@ namespace GCL.Syntax
 
             stringGrammar.DefineTokens();
 
-            var codeParser = new CodeParser(new GclCodeGenerator(),
+            var gclCodeGenerator = new GclCodeGenerator();
+            var semanticAnalysis = new SemanticAnalysis();
+
+            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
+            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
+            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
+
+            var codeParser = new CodeParser(gclCodeGenerator,
                 dynamicCodeProvider,
-                new SemanticAnalysis(),
+                semanticAnalysis,
                 semanticMethods,
                 stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
