@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GCL.Syntax;
+using Token_Analizer;
 using Xunit;
 using CodeParser = GCL.Syntax.CodeParser;
 
@@ -20,7 +21,7 @@ namespace Syntax.Tests
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
-            var codeParser = new CodeParser(sourceTokens, grammarTokens, grammarCode);
+            var codeParser = new CodeParser(sourceTokens, grammarCode, new Lexer(grammarTokens));
             codeParser.Parse(sourceCode);
         }
     }

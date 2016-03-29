@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Token_Analizer;
 
 namespace GCL.Syntax
 {
@@ -11,7 +12,7 @@ namespace GCL.Syntax
             var sourceTokens = File.ReadAllText(@"Tokens.txt");
             var grammarCode = File.ReadAllText(@"GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"GrammarTokens.txt");
-            var codeParser = new CodeParser(sourceTokens, grammarTokens, grammarCode);
+            var codeParser = new CodeParser(sourceTokens, grammarCode, new Lexer(grammarTokens));
             codeParser.Parse(sourceCode);
             Console.ReadLine();
         }

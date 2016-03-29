@@ -36,7 +36,7 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(string tokensCode, string grammarTokensCode, string codeGrammar)
+        public CodeParser(string tokensCode, string codeGrammar, Lexer readGrammarLexer)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
@@ -51,9 +51,8 @@ namespace GCL.Syntax
             cudaDefined = new BoolWrapper(false);
             dynamicCode.AddToScope(atDevice, "AtDevice");
             dynamicCode.AddToScope(cudaDefined, "CudaDefined");
-            var readGrammarLexer = new Lexer(grammarTokensCode);
-            lexer = new Lexer(tokensCode);
-            stringGrammar = new StringGrammar(lexer.TokenNames, dynamicCode, semanticMethods);
+            this.lexer = new Lexer(tokensCode);
+            stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCode, semanticMethods);
             nodeStack = new Stack<int>();
             nodeStack.Push(0);
             temporalStack = new Stack<Symbol>();
@@ -62,7 +61,7 @@ namespace GCL.Syntax
             readGrammarLexer.Start(codeGrammar);
             stringGrammar.DefineTokens();
             parser = new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
-            lexer.TokenCourier += ParseToken;
+            this.lexer.TokenCourier += ParseToken;
 
             codeGenerator = new GclCodeGenerator(10000);
             dynamicCode.AddToScope(codeGenerator, "codegen");

@@ -77,6 +77,10 @@
       <Project>{c7985623-3429-48c3-8136-b1f574b527ac}</Project>
       <Name>GCL.Syntax</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Token_Analizer\Token_Analizer.csproj">
+      <Project>{2b6d6572-77f2-4f4c-bb4c-316948e45bf1}</Project>
+      <Name>Token_Analizer</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestData\GrammarGCL.txt">
