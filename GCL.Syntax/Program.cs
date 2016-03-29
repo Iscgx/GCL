@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
+using GCL.Lex;
 using GCL.Syntax.Dynamic;
 using Semantic;
-using Token_Analizer;
 
 namespace GCL.Syntax
 {

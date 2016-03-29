@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GCL.Lex;
 using GCL.Syntax.Data;
 using GCL.Syntax.Dynamic;
 using Semantic;
-using Token_Analizer;
 using Attribute = Semantic.Attribute;
 
 namespace GCL.Syntax

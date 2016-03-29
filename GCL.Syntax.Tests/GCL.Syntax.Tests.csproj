@@ -73,6 +73,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GCL.Lex\GCL.Lex.csproj">
+      <Project>{2B6D6572-77F2-4F4C-BB4C-316948E45BF1}</Project>
+      <Name>GCL.Lex</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GCL.Syntax\GCL.Syntax.csproj">
       <Project>{c7985623-3429-48c3-8136-b1f574b527ac}</Project>
       <Name>GCL.Syntax</Name>
@@ -80,10 +84,6 @@
     <ProjectReference Include="..\Semantic\Semantic.csproj">
       <Project>{79A5F6F3-8FDC-4670-AAAA-DEDBA4ACB2DF}</Project>
       <Name>Semantic</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Token_Analizer\Token_Analizer.csproj">
-      <Project>{2b6d6572-77f2-4f4c-bb4c-316948e45bf1}</Project>
-      <Name>Token_Analizer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

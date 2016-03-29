@@ -81,13 +81,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GCL.Lex\GCL.Lex.csproj">
+      <Project>{2B6D6572-77F2-4F4C-BB4C-316948E45BF1}</Project>
+      <Name>GCL.Lex</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Semantic\Semantic.csproj">
       <Project>{79a5f6f3-8fdc-4670-aaaa-dedba4acb2df}</Project>
       <Name>Semantic</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Token_Analizer\Token_Analizer.csproj">
-      <Project>{2b6d6572-77f2-4f4c-bb4c-316948e45bf1}</Project>
-      <Name>Token_Analizer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

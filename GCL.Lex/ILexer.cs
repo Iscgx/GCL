@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Token_Analizer
+namespace GCL.Lex
 {
     public interface ILexer
     {

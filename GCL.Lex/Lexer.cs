@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-//using System.IO;
 using System.Linq;
+//using System.IO;
 
-namespace Token_Analizer
+namespace GCL.Lex
 {
     public class Lexer : ILexer
     {

@@ -1,4 +1,4 @@
-﻿namespace Token_Analizer
+﻿namespace GCL.Lex
 {
     public class Token
     {

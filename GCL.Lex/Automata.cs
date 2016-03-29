@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Token_Analizer
+namespace GCL.Lex
 {
 
     public enum AutomataTypes

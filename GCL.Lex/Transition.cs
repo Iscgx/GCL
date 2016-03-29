@@ -1,4 +1,4 @@
-﻿namespace Token_Analizer
+﻿namespace GCL.Lex
 {
     class Transition
     {

@@ -7,8 +7,8 @@
     <ProjectGuid>{2B6D6572-77F2-4F4C-BB4C-316948E45BF1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Token_Analizer</RootNamespace>
-    <AssemblyName>Token_Analizer</AssemblyName>
+    <RootNamespace>GCL.Lex</RootNamespace>
+    <AssemblyName>GCL.Lex</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>

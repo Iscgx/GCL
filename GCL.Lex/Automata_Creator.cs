@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Token_Analizer
+namespace GCL.Lex
 {
     static class AutomataCreator
     {

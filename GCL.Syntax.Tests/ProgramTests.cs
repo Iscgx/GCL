@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using GCL.Lex;
 using GCL.Syntax;
 using GCL.Syntax.Dynamic;
 using Semantic;
-using Token_Analizer;
 using Xunit;
 using CodeParser = GCL.Syntax.CodeParser;
 
