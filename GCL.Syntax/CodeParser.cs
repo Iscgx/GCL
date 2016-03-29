@@ -36,7 +36,12 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(string tokensCode, string codeGrammar, ILexer readGrammarLexer, GclCodeGenerator gclCodeGenerator, DynamicCodeProvider dynamicCodeProvider)
+        public CodeParser(
+            string tokensCode, 
+            string codeGrammar, 
+            ILexer readGrammarLexer, 
+            GclCodeGenerator gclCodeGenerator, 
+            DynamicCodeProvider dynamicCodeProvider)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
