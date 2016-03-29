@@ -8,29 +8,27 @@ namespace GCL.Syntax.Data
 {
     public class Node : IEnumerable<Element>
     {
-        private readonly NodeArea kernel;
-        private readonly NodeArea footer;
         private readonly HashSet<Node> neighbors;
         private readonly Dictionary<Symbol, Node> transtions;
 
-        public NodeArea Kernel => kernel;
+        public NodeArea Kernel { get; }
 
-        public NodeArea Footer => footer;
+        public NodeArea Footer { get; }
 
         public Dictionary<Symbol, Node> Transitions => new Dictionary<Symbol, Node>(transtions);
 
         public Node()
         {
-            kernel = new NodeArea();
-            footer = new NodeArea();
+            Kernel = new NodeArea();
+            Footer = new NodeArea();
             transtions = new Dictionary<Symbol, Node>();
             neighbors = new HashSet<Node>();
         }
 
         public Node(IEnumerable<Element> kernel)
         {
-            this.kernel = new NodeArea(kernel);
-            footer = new NodeArea();
+            this.Kernel = new NodeArea(kernel);
+            Footer = new NodeArea();
             transtions = new Dictionary<Symbol, Node>();
             neighbors = new HashSet<Node>();
         }
@@ -48,7 +46,7 @@ namespace GCL.Syntax.Data
 
         public override int GetHashCode()
         {
-            return kernel.GetHashCode() ^ footer.GetHashCode();
+            return Kernel.GetHashCode() ^ Footer.GetHashCode();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -61,7 +59,7 @@ namespace GCL.Syntax.Data
             if (obj == null || (obj is Node) == false)
                 return false;
             var otherNode = obj as Node;
-            return kernel == otherNode.kernel;
+            return Kernel == otherNode.Kernel;
         }
 
         public static bool operator ==(Node n1, Node n2)
