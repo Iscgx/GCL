@@ -22,7 +22,7 @@ namespace GCL.Syntax
         private readonly Dictionary<Production, string> semanticMethods;
         private readonly CompiledClass compiledSemanticMethods;
         private readonly SemanticAnalysis semanticAnalysis;
-        private readonly GclCodeGenerator codeGenerator;
+        private readonly GclCodeGenerator gclCodeGenerator;
         private readonly BoolWrapper atDevice;
         private readonly BoolWrapper cudaDefined;
 
@@ -55,7 +55,7 @@ namespace GCL.Syntax
             
             this.parser = parser;
 
-            codeGenerator = gclCodeGenerator;
+            this.gclCodeGenerator = gclCodeGenerator;
 
             dynamicCodeProvider.AddToScope(productionSymbols, "element");
             dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
@@ -87,7 +87,7 @@ namespace GCL.Syntax
             {
                 ParseToken(token);
             }
-            return codeGenerator.End();
+            return gclCodeGenerator.End();
         }
 
         public void ParseToken(Token token)
