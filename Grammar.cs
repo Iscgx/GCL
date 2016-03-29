@@ -167,55 +167,6 @@ namespace gcl2
             }
         }
 
-        //private HashSet<Symbol> Follow(Symbol symbol, ISet<Symbol> followSet, ISet<Symbol> dontRecurseSet)
-        //{
-        //    if (_calculatedFollows.ContainsKey(symbol) == true)
-        //        return new HashSet<Symbol>(_calculatedFollows[symbol]);
-        //    if(symbol.Id == 1)
-        //        followSet.Add(EndOfFile);
-        //    foreach (var production in Produces(symbol))
-        //    {
-        //        for (var i = 0; i < production.Product.Count; i++)
-        //        {
-        //            if (production.Product[i] == symbol)
-        //            {
-        //                if (i == (production.Product.Count - 1)) //beta is empty.
-        //                {
-        //                    if (_calculatedFollows.ContainsKey(symbol) == true)
-        //                        followSet.UnionWith(_calculatedFollows[symbol]);
-        //                    else if (dontRecurseSet.Contains(production.Producer) == false)
-        //                    {
-        //                        if(production.Product.Count > 1)
-        //                           dontRecurseSet.Add(production.Producer);
-        //                        followSet.UnionWith(Follow(production.Producer, new HashSet<Symbol>(), dontRecurseSet));               
-        //                    }
-
-        //                }
-        //                else //beta is not empty
-        //                {
-        //                    var beta = new List<Symbol>();
-        //                    for (var j = i + 1; j < production.Product.Count; j++)
-        //                        beta.Add(production.Product[j]);
-        //                    followSet.UnionWith(First(beta).Where(s => s != Epsilon));
-        //                    if (First(beta).Contains(Epsilon) == true)
-        //                    {
-        //                        if (_calculatedFollows.ContainsKey(symbol) == true)
-        //                            followSet.UnionWith(_calculatedFollows[symbol]);
-        //                        else if (dontRecurseSet.Contains(production.Producer) == false)
-        //                        {
-        //                            dontRecurseSet.Add(production.Producer);
-        //                            followSet.UnionWith(Follow(production.Producer, new HashSet<Symbol>(), dontRecurseSet));
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    if (_calculatedFollows.ContainsKey(symbol) == false)
-        //        _calculatedFollows.Add(symbol, new HashSet<Symbol>(followSet));
-        //    return _calculatedFollows[symbol];
-        //}
-
         private void First(Symbol caller, IEnumerable<Symbol> symbols, HashSet<Symbol> firstSet)
         {
             foreach (var symbol in symbols.TakeWhile(symbol => symbol != caller))
