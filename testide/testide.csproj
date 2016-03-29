@@ -88,9 +88,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\gcl.csproj">
+    <ProjectReference Include="..\Syntax.csproj">
       <Project>{c7985623-3429-48c3-8136-b1f574b527ac}</Project>
-      <Name>gcl</Name>
+      <Name>Syntax</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
