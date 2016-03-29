@@ -10,7 +10,7 @@ namespace gcl2.Data
     /// </summary>
     public class Element
     {
-        private readonly int _hashcode;
+        private readonly int hashcode;
         public Production Production { get; private set; }
         public int ReadIndex { get; private set; }
 
@@ -51,7 +51,7 @@ namespace gcl2.Data
           
             Production = production;
             ReadIndex = readIndex;
-            _hashcode = readIndex + Production.GetHashCode();
+            hashcode = readIndex + Production.GetHashCode();
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace gcl2.Data
 
         public override int GetHashCode()
         {
-            return _hashcode;
+            return hashcode;
         }
 
         /// <summary>

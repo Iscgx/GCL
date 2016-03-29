@@ -11,27 +11,27 @@ namespace gcl2
     public class Parser
     {
         public Grammar Grammar { get; private set; }
-        private readonly Dictionary<Node, Node> _nodes;
+        private readonly Dictionary<Node, Node> nodes;
 
         public SyntaxTable SyntaxTable { get; private set; }
 
         public Parser(Grammar grammar, Symbol initial)
         {
             Grammar = grammar;
-            _nodes = new Dictionary<Node, Node>();
+            nodes = new Dictionary<Node, Node>();
             var head = new Node();
             var start = grammar.NewSymbol(SymbolType.NonTerminal);
             var production = new Production(start, initial);
             grammar.Add(start, production);
             head.Kernel.Add(production);
             Closure(head);
-            SyntaxTable = new SyntaxTable(new List<Node>(_nodes.Select(e => e.Key)), head, this, start);
+            SyntaxTable = new SyntaxTable(new List<Node>(nodes.Select(e => e.Key)), head, this, start);
         }
 
         private void Closure(Node node)
         {
-            if (_nodes.ContainsKey(node) == false)
-                _nodes[node] = node;
+            if (nodes.ContainsKey(node) == false)
+                nodes[node] = node;
             var footer = node.Footer;
             var usedSymbols = new HashSet<Symbol>();
             var availableElements = new Stack<Element>(node.Kernel);
@@ -78,14 +78,14 @@ namespace gcl2
             {
                 var newNode = new Node(group.Value);
 
-                if (_nodes.ContainsKey(newNode) == false)
+                if (nodes.ContainsKey(newNode) == false)
                 {
-                    _nodes.Add(newNode, newNode);
+                    nodes.Add(newNode, newNode);
                     Closure(newNode);
                 }
                 else
                 {
-                    newNode = _nodes[newNode];
+                    newNode = nodes[newNode];
                 }
 
                 if (node.IsConnected(newNode) == false)
