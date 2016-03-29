@@ -16,12 +16,8 @@ namespace GCL.Syntax.Data
 
         public Dictionary<Symbol, Node> Transitions { get; }
 
-        public Node()
+        public Node() : this(Enumerable.Empty<Element>())
         {
-            Kernel = new NodeArea();
-            Footer = new NodeArea();
-            Transitions = new Dictionary<Symbol, Node>();
-            neighbors = new HashSet<Node>();
         }
 
         public Node(IEnumerable<Element> kernel)
