@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Semantic;
-using gcl2.Data;
+using Syntax.Data;
 
-namespace gcl2
+namespace Syntax
 {
     public enum ActionType
     {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Semantic;
-using gcl2.Data;
+using Syntax.Data;
 using Attribute = Semantic.Attribute;
 
-namespace gcl2
+namespace Syntax
 {    
     public class Grammar : IEnumerable<List<Production>>
     {

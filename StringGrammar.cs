@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Token_Analizer;
-using gcl2.Data;
-using gcl2.Dynamic;
 using Semantic;
+using Syntax.Data;
+using Syntax.Dynamic;
 using Attribute = Semantic.Attribute;
 
-namespace gcl2
+namespace Syntax
 {
     public class StringGrammar
     {

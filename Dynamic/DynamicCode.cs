@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace gcl2.Dynamic
+namespace Syntax.Dynamic
 {
     public class DynamicCodeProvider
     {

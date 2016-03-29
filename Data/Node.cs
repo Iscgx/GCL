@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Semantic;
 
-namespace gcl2.Data
+namespace Syntax.Data
 {
     public class Node : IEnumerable<Element>
     {

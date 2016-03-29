@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace gcl2
+namespace Syntax
 {
     [Serializable]
     public class SintacticParserException : ApplicationException

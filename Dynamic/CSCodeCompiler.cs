@@ -3,7 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using Microsoft.CSharp;
 
-namespace gcl2.Dynamic
+namespace Syntax.Dynamic
 {
     static class CsCodeCompiler
     {

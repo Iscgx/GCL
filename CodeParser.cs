@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Token_Analizer;
-using gcl2.Data;
-using gcl2.Dynamic;
 using Semantic;
+using Syntax.Data;
+using Syntax.Dynamic;
 
-namespace gcl2
+namespace Syntax
 {
     public delegate void OnLexicalError(string message);
 

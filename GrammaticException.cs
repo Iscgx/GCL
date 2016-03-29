@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Semantic;
 
-namespace gcl2
+namespace Syntax
 {
     [Serializable]
     public class GrammaticException : SintacticParserException

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using Semantic;
 
-namespace gcl2.Data
+namespace Syntax.Data
 {
     public class Production
     {

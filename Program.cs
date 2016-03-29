@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Token_Analizer;
 
-namespace gcl2
+namespace Syntax
 {
     class Program
     {
