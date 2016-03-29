@@ -47,9 +47,9 @@ namespace Semantic
             }
         }
 
-        public void End()
+        public string End()
         {
-            var debugString = builder.ToString();
+           return builder.ToString();
         }
     }
 }

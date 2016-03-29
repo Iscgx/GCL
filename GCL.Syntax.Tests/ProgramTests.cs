@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentAssertions;
 using GCL.Syntax;
 using GCL.Syntax.Dynamic;
 using Semantic;
@@ -30,7 +31,8 @@ namespace Syntax.Tests
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
                 new SemanticAnalysis());
-            codeParser.Parse(sourceCode);
+            var code = codeParser.Parse(sourceCode);
+            code.Length.Should().Be(415);
         }
 
         [Fact]
