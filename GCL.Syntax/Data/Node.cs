@@ -9,19 +9,18 @@ namespace GCL.Syntax.Data
     public class Node : IEnumerable<Element>
     {
         private readonly HashSet<Node> neighbors;
-        private readonly Dictionary<Symbol, Node> transtions;
 
         public NodeArea Kernel { get; }
 
         public NodeArea Footer { get; }
 
-        public Dictionary<Symbol, Node> Transitions => new Dictionary<Symbol, Node>(transtions);
+        public Dictionary<Symbol, Node> Transitions { get; }
 
         public Node()
         {
             Kernel = new NodeArea();
             Footer = new NodeArea();
-            transtions = new Dictionary<Symbol, Node>();
+            Transitions = new Dictionary<Symbol, Node>();
             neighbors = new HashSet<Node>();
         }
 
@@ -29,7 +28,7 @@ namespace GCL.Syntax.Data
         {
             this.Kernel = new NodeArea(kernel);
             Footer = new NodeArea();
-            transtions = new Dictionary<Symbol, Node>();
+            Transitions = new Dictionary<Symbol, Node>();
             neighbors = new HashSet<Node>();
         }
 
@@ -40,7 +39,7 @@ namespace GCL.Syntax.Data
 
         public void AddTransition(Symbol symbol, Node otherNode)
         {
-            transtions[symbol] = otherNode;
+            Transitions[symbol] = otherNode;
             neighbors.Add(otherNode);
         }
 
