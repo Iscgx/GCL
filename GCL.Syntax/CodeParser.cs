@@ -38,7 +38,6 @@ namespace GCL.Syntax
         public CodeParser(GclCodeGenerator gclCodeGenerator,
             DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis,
-            IEnumerable<Token> grammarTokens,
             Dictionary<Production, string> semanticMethods,
             StringGrammar stringGrammar)
         {
@@ -52,13 +51,7 @@ namespace GCL.Syntax
             cudaDefined = new BoolWrapper(false);
             this.semanticAnalysis = semanticAnalysis;
             this.stringGrammar = stringGrammar;
-
-            foreach (var token in grammarTokens)
-            {
-                this.stringGrammar.AddSymbolDefinition(token);
-            }
-
-            this.stringGrammar.DefineTokens();
+            
             parser = new Parser(this.stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
 
             codeGenerator = gclCodeGenerator;

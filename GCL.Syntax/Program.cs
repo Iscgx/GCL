@@ -21,12 +21,20 @@ namespace GCL.Syntax
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
             var semanticMethods = new Dictionary<Production, string>();
 
+            var stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods);
+
+            foreach (var token in readGrammarLexer.Parse(grammarCode))
+            {
+                stringGrammar.AddSymbolDefinition(token);
+            }
+
+            stringGrammar.DefineTokens();
+
             var codeParser = new CodeParser(new GclCodeGenerator(),
                 dynamicCodeProvider,
                 new SemanticAnalysis(),
-                readGrammarLexer.Parse(grammarCode),
                 semanticMethods,
-                new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods));
+                stringGrammar);
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             Console.ReadLine();
         }
