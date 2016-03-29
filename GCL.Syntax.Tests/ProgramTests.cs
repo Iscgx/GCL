@@ -22,6 +22,23 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
+            var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
+
+            var codeParser = new CodeParser(new Lexer(sourceTokens),
+                grammarCode,
+                new Lexer(grammarTokens), 
+                new GclCodeGenerator(),
+                new DynamicCodeProvider(),
+                new SemanticAnalysis());
+            codeParser.Parse(sourceCode);
+        }
+
+        [Fact]
+        public static void StubMain()
+        {
+            var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
+            var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
+            var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
             var codeParser = new CodeParser(new Lexer(sourceTokens),
                 grammarCode,
                 new StubLexer(),
