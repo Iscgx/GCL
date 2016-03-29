@@ -6,10 +6,10 @@ using System.Linq;
 
 namespace Token_Analizer
 {
-    public class Lexer
+    public class Lexer : ILexer
     {
         public List<string> TokenNames { get; private set; } //Token Names with corresponding ID (index)
-        public Action<Token> TokenCourier;
+        public Action<Token> TokenCourier { get; set; }
 
         private List<Automata> automatas;
         private int _string, lowlevel, cSharpCode, error, endOfFile, newLine; //Index of string token type, lowlevel type and EOF token type

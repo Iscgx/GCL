@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Automata.cs" />
     <Compile Include="Automata_Creator.cs" />
+    <Compile Include="ILexer.cs" />
     <Compile Include="Lexer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
