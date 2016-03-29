@@ -37,10 +37,10 @@ namespace GCL.Syntax
         public OnSintacticalError OnSintacticalError;
 
         public CodeParser(
-            ILexer codeLexer, 
+            ILexer codeLexer,
             string codeGrammar,
             ILexer readGrammarLexer,
-            GclCodeGenerator gclCodeGenerator, 
+            GclCodeGenerator gclCodeGenerator,
             DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis)
         {
@@ -74,8 +74,12 @@ namespace GCL.Syntax
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
             try
             {
-                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider, "Semantic.dll",
-                    "Microsoft.CSharp.dll", "System.Core.dll", "System.dll", "System.Collections.dll");
+                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider,
+                    "Semantic.dll",
+                    "Microsoft.CSharp.dll",
+                    "System.Core.dll",
+                    "System.dll",
+                    "System.Collections.dll");
             }
             catch (Exception)
             {
