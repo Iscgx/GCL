@@ -22,7 +22,7 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
-            var codeParser = new CodeParser(sourceTokens, grammarCode, new StubLexer(), new GclCodeGenerator(), new DynamicCodeProvider());
+            var codeParser = new CodeParser(sourceTokens, grammarCode, new StubLexer(), new GclCodeGenerator(), new DynamicCodeProvider(), new SemanticAnalysis());
             codeParser.Parse(sourceCode);
         }
     }

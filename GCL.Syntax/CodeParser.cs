@@ -22,7 +22,7 @@ namespace GCL.Syntax
         private readonly ILexer lexer;
         private readonly Dictionary<Production, string> semanticMethods;
         private readonly CompiledClass compiledSemanticMethods;
-        private readonly SemanticAnalysis semantic;
+        private readonly SemanticAnalysis semanticAnalysis;
         private readonly GclCodeGenerator codeGenerator;
         private readonly BoolWrapper atDevice;
         private readonly BoolWrapper cudaDefined;
@@ -41,16 +41,17 @@ namespace GCL.Syntax
             string codeGrammar, 
             ILexer readGrammarLexer, 
             GclCodeGenerator gclCodeGenerator, 
-            DynamicCodeProvider dynamicCodeProvider)
+            DynamicCodeProvider dynamicCodeProvider, 
+            SemanticAnalysis semanticAnalysis)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
-            semantic = new SemanticAnalysis();
+            this.semanticAnalysis = semanticAnalysis;
             
             productionSymbols = new List<Symbol>();
-            dynamicCodeProvider.AddToScope(semantic, "semantic");
+            dynamicCodeProvider.AddToScope(this.semanticAnalysis, "semantic");
             dynamicCodeProvider.AddToScope(productionSymbols, "element");
-            dynamicCodeProvider.AddToScope(semantic.ThrowError, "ThrowError");
+            dynamicCodeProvider.AddToScope(this.semanticAnalysis.ThrowError, "ThrowError");
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
             dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
@@ -126,7 +127,7 @@ namespace GCL.Syntax
                         Shift(action.Item2, symbol);
                         break;
                     case ActionType.Accept:
-                        Console.WriteLine(accepted && semantic.SemanticError == false ? @"Accepted" : @"Not accepted");
+                        Console.WriteLine(accepted && semanticAnalysis.SemanticError == false ? @"Accepted" : @"Not accepted");
                         Console.WriteLine(@"Parse: {0} ms", (DateTime.Now - parseStartTime).TotalMilliseconds);
                         break;
                     case ActionType.Reduce:
