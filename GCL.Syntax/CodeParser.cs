@@ -88,12 +88,12 @@ namespace GCL.Syntax
             Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
-        public string Parse(string code)
+        public string Parse(IEnumerable<Token> tokens)
         {
             nodeStack.Clear();
             nodeStack.Push(0);
             temporalStack.Clear();
-            foreach (var token in lexer.Parse(code))
+            foreach (var token in tokens)
             {
                 ParseToken(token);
             }

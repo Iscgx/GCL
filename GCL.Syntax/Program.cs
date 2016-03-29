@@ -19,7 +19,7 @@ namespace GCL.Syntax
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
                 new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode));
-            codeParser.Parse(sourceCode);
+            codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             Console.ReadLine();
         }
 
