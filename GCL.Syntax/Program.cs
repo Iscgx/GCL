@@ -14,12 +14,11 @@ namespace GCL.Syntax
             var sourceTokens = File.ReadAllText(@"Tokens.txt");
             var grammarCode = File.ReadAllText(@"GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"GrammarTokens.txt");
+            ILexer readGrammarLexer = new Lexer(grammarTokens);
             var codeParser = new CodeParser(new Lexer(sourceTokens),
-                grammarCode,
-                new Lexer(grammarTokens),
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
-                new SemanticAnalysis());
+                new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode));
             codeParser.Parse(sourceCode);
             Console.ReadLine();
         }

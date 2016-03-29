@@ -38,11 +38,10 @@ namespace GCL.Syntax
 
         public CodeParser(
             ILexer codeLexer,
-            string codeGrammar,
-            ILexer readGrammarLexer,
             GclCodeGenerator gclCodeGenerator,
             DynamicCodeProvider dynamicCodeProvider,
-            SemanticAnalysis semanticAnalysis)
+            SemanticAnalysis semanticAnalysis,
+            IEnumerable<Token> grammarTokens)
         {
             var then = DateTime.Now;
             semanticMethods = new Dictionary<Production, string>();
@@ -56,7 +55,7 @@ namespace GCL.Syntax
             this.lexer = codeLexer;
             stringGrammar = new StringGrammar(this.lexer.TokenNames, dynamicCodeProvider, semanticMethods);
 
-            foreach (var token in readGrammarLexer.Parse(codeGrammar))
+            foreach (var token in grammarTokens)
             {
                 stringGrammar.AddSymbolDefinition(token);
             }

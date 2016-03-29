@@ -25,12 +25,11 @@ namespace Syntax.Tests
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
 
-            var codeParser = new CodeParser(new Lexer(sourceTokens),
-                grammarCode,
-                new Lexer(grammarTokens), 
+            ILexer readGrammarLexer = new Lexer(grammarTokens);
+            var codeParser = new CodeParser(new Lexer(sourceTokens), 
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
-                new SemanticAnalysis());
+                new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode));
             var code = codeParser.Parse(sourceCode);
             code.Length.Should().Be(415);
         }
@@ -41,12 +40,11 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
+            ILexer readGrammarLexer = new StubLexer();
             var codeParser = new CodeParser(new Lexer(sourceTokens),
-                grammarCode,
-                new StubLexer(),
                 new GclCodeGenerator(),
                 new DynamicCodeProvider(),
-                new SemanticAnalysis());
+                new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode));
             codeParser.Parse(sourceCode);
         }
     }
