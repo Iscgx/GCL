@@ -11,7 +11,6 @@ namespace gcl2
     public class Parser
     {
         public Grammar Grammar { get; private set; }
-        private readonly Node _head;
         private readonly Dictionary<Node, Node> _nodes;
 
         public SyntaxTable SyntaxTable { get; private set; }
@@ -20,13 +19,13 @@ namespace gcl2
         {
             Grammar = grammar;
             _nodes = new Dictionary<Node, Node>();
-            _head = new Node();
+            var head = new Node();
             var start = grammar.NewSymbol(SymbolType.NonTerminal);
             var production = new Production(start, initial);
             grammar.Add(start, production);
-            _head.Kernel.Add(production);
-            Closure(_head);
-            SyntaxTable = new SyntaxTable(new List<Node>(_nodes.Select(e => e.Key)), _head, this, start);
+            head.Kernel.Add(production);
+            Closure(head);
+            SyntaxTable = new SyntaxTable(new List<Node>(_nodes.Select(e => e.Key)), head, this, start);
         }
 
         private void Closure(Node node)
