@@ -17,10 +17,17 @@ namespace GCL.Syntax
             var grammarCode = File.ReadAllText(@"GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"GrammarTokens.txt");
             ILexer readGrammarLexer = new Lexer(grammarTokens);
-            var codeParser = new CodeParser(new Lexer(sourceTokens),
+            ILexer codeLexer = new Lexer(sourceTokens);
+            DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
+            var semanticMethods = new Dictionary<Production, string>();
+
+            var codeParser = new CodeParser(codeLexer,
                 new GclCodeGenerator(),
-                new DynamicCodeProvider(),
-                new SemanticAnalysis(), readGrammarLexer.Parse(grammarCode), new Dictionary<Production, string>());
+                dynamicCodeProvider,
+                new SemanticAnalysis(),
+                readGrammarLexer.Parse(grammarCode),
+                semanticMethods,
+                new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods));
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             Console.ReadLine();
         }

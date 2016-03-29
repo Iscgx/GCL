@@ -41,7 +41,8 @@ namespace GCL.Syntax
             DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis,
             IEnumerable<Token> grammarTokens,
-            Dictionary<Production, string> semanticMethods)
+            Dictionary<Production, string> semanticMethods,
+            StringGrammar stringGrammar)
         {
             var then = DateTime.Now;
             this.semanticMethods = semanticMethods;
@@ -52,15 +53,15 @@ namespace GCL.Syntax
             atDevice = new BoolWrapper(false);
             cudaDefined = new BoolWrapper(false);
             this.semanticAnalysis = semanticAnalysis;
-            stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, this.semanticMethods);
+            this.stringGrammar = stringGrammar;
 
             foreach (var token in grammarTokens)
             {
-                stringGrammar.AddSymbolDefinition(token);
+                this.stringGrammar.AddSymbolDefinition(token);
             }
 
-            stringGrammar.DefineTokens();
-            parser = new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
+            this.stringGrammar.DefineTokens();
+            parser = new Parser(this.stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
 
             codeGenerator = gclCodeGenerator;
             dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
