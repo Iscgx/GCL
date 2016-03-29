@@ -15,26 +15,19 @@ namespace gcl2
         private readonly Dictionary<Symbol, HashSet<Symbol>> calculatedFollows;
         private readonly Dictionary<Symbol, HashSet<Production>> products;
         private readonly List<Symbol> terminals;
-        private readonly List<Symbol> nonTerminals; 
-        private readonly Symbol epsilon;
-        private readonly Symbol endOfFile;
+        private readonly List<Symbol> nonTerminals;
         private bool hasCalculatedFollows = false;
         private int symbolIdentity = 1;
-        public Symbol Epsilon
-        {
-            get { return epsilon; }
-        }
 
-        public Symbol EndOfFile
-        {
-            get { return endOfFile; }
-        }
+        public Symbol Epsilon { get; }
+
+        public Symbol EndOfFile { get; }
 
         public Grammar()
         {
             productions = new Dictionary<Symbol, List<Production>>();
-            epsilon = new Symbol(SymbolType.Epsilon, 0);
-            endOfFile = new Symbol(SymbolType.EndOfFile, -1);
+            Epsilon = new Symbol(SymbolType.Epsilon, 0);
+            EndOfFile = new Symbol(SymbolType.EndOfFile, -1);
             calculatedFirsts = new Dictionary<Symbol, HashSet<Symbol>>();
             products = new Dictionary<Symbol, HashSet<Production>>();
             calculatedFollows = new Dictionary<Symbol, HashSet<Symbol>>();
