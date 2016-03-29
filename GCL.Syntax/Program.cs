@@ -34,7 +34,7 @@ namespace GCL.Syntax
                 dynamicCodeProvider,
                 new SemanticAnalysis(),
                 semanticMethods,
-                stringGrammar);
+                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             Console.ReadLine();
         }

@@ -39,7 +39,8 @@ namespace GCL.Syntax
             DynamicCodeProvider dynamicCodeProvider,
             SemanticAnalysis semanticAnalysis,
             Dictionary<Production, string> semanticMethods,
-            StringGrammar stringGrammar)
+            StringGrammar stringGrammar,
+            Parser parser)
         {
             var then = DateTime.Now;
             this.semanticMethods = semanticMethods;
@@ -52,7 +53,7 @@ namespace GCL.Syntax
             this.semanticAnalysis = semanticAnalysis;
             this.stringGrammar = stringGrammar;
             
-            parser = new Parser(this.stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1));
+            this.parser = parser;
 
             codeGenerator = gclCodeGenerator;
             dynamicCodeProvider.AddToScope(codeGenerator, "codegen");
