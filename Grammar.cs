@@ -212,13 +212,7 @@ namespace gcl2
             }
         }
 
-        public List<Production> this[Symbol producer]
-        {
-            get
-            {
-                return productions[producer];
-            }
-        }
+        public List<Production> this[Symbol producer] => productions[producer];
 
         public IEnumerator<List<Production>> GetEnumerator()
         {
