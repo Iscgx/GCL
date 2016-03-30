@@ -26,6 +26,8 @@ namespace Syntax.Tests
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
 
+            var tokens = new Lexer(sourceTokens).Parse(sourceCode);
+
             ILexer readGrammarLexer = new Lexer(grammarTokens);
             ILexer codeLexer = new Lexer(sourceTokens);
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
@@ -52,7 +54,7 @@ namespace Syntax.Tests
                 semanticAnalysis,
                 semanticMethods,
                 stringGrammar, new Parser(stringGrammar.Grammar));
-            var code = codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
+            var code = codeParser.Parse(tokens);
             code.Length.Should().Be(415);
         }
 
@@ -62,6 +64,9 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
+
+            var tokens = new Lexer(sourceTokens).Parse(sourceCode);
+
             ILexer readGrammarLexer = new StubLexer();
             ILexer codeLexer = new Lexer(sourceTokens);
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
@@ -87,7 +92,7 @@ namespace Syntax.Tests
                 semanticAnalysis,
                 semanticMethods,
                 stringGrammar, new Parser(stringGrammar.Grammar));
-            codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
+            codeParser.Parse(tokens);
         }
     }
 
