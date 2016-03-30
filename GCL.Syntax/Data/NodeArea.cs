@@ -19,9 +19,9 @@ namespace GCL.Syntax.Data
             elements = new HashSet<Element>(collection);
         }
 
-        public void Add(Production production)
+        public void Add(Element element)
         {
-            elements.Add(new Element(production));
+            elements.Add(element);
         }
 
         public bool Has(Element element)

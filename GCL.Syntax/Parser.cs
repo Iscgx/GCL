@@ -21,7 +21,7 @@ namespace GCL.Syntax
             grammar.Add(startSymbol, production);
 
             var head = new Node();
-            head.Kernel.Add(production);
+            head.Kernel.Add(new Element(production));
             Closure(head);
             SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, startSymbol);
         }
@@ -57,7 +57,7 @@ namespace GCL.Syntax
                     if (footer.Has(productionToElement) == false)
                     {
                         availableElements.Push(productionToElement);
-                        footer.Add(production);
+                        footer.Add(new Element(production));
                     }
 
                 }
