@@ -19,7 +19,7 @@ namespace GCL.Syntax.Data
             elements = new HashSet<Element>(collection);
         }
 
-        public void Add(Element element)
+        private void Add(Element element)
         {
             if (element == null)
 // ReSharper disable NotResolvedInText
