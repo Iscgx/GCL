@@ -246,9 +246,8 @@ namespace GCL.Syntax
         private void Reduce(int value)
         {
             var production = parser.SyntaxTable.ProductionById(value);
-
-            
             var reversedStack = new Stack<Symbol>();
+
             for (var i = 0; i < production.Product.Count; i++)
             {
                 nodeStack.Pop();
@@ -268,7 +267,6 @@ namespace GCL.Syntax
             temporalStack.Push(producer);
             var goTo = parser.SyntaxTable[nodeStack.Peek(), production.Producer];
             nodeStack.Push(goTo.Item2);
-
         }
 
         private void PrintProduction(Production prod)
