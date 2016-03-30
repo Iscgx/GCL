@@ -96,7 +96,6 @@ namespace GCL.Syntax
             }
             if (stringGrammar.TokenDictionary.ContainsKey(token.Type) == false)
             {
-                OnLexicalError?.Invoke(token.Message);
             }
             else
             {
@@ -135,7 +134,6 @@ namespace GCL.Syntax
                         ParseToken(token, actionCounts);
                         break;
                     case ActionType.Error:
-                        OnSintacticalError?.Invoke($@"Syntax error at line {token.Message}, token {token.Lexeme}.");
                         Console.WriteLine(@"Syntax error at line {0}, near token {1}.", token.Message, token.Lexeme);
                         Console.Write(@"Expecting token:");
                         var first = true;
