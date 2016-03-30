@@ -87,46 +87,69 @@ namespace GCL.Syntax
                 switch (action.Item1)
                 {
                     case ActionType.Shift:
-                        Shift(action.Item2, symbol);
+                        ShiftAction(action, symbol);
                         break;
                     case ActionType.Accept:
-                        Console.WriteLine(@"Parse: {0} ms", (DateTime.Now - parseStartTime).TotalMilliseconds);
+                        AcceptAction();
                         break;
                     case ActionType.Reduce:
-                        Reduce(action.Item2);
-                        ParseToken(token, actionCounts);
+                        ReduceAction(token, actionCounts, action);
                         break;
                     case ActionType.Error:
-                        OnSintacticalError?.Invoke($@"Syntax error at line {token.Message}, token {token.Lexeme}.");
-                        Console.WriteLine(@"Syntax error at line {0}, near token {1}.", token.Message, token.Lexeme);
-                        Console.Write(@"Expecting token:");
-                        var first = true;
-                        foreach(var sym in stringGrammar.SymbolTable)
-                        {
-                            if (sym.Value.Type == SymbolType.Terminal && parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value))
-                            {
-                                if (first)
-                                {
-                                    first = false;
-                                }
-                                else
-                                {
-                                    Console.Write("|");
-                                }
-                                Console.Write(@" ""{0}"" ", sym.Key);
-                            }
-                        }
-                        Console.WriteLine("\n");
-
-                        accepted = false;
-
-                        PanicModeErrorRecovery();
+                        ErrorAction(token);
                         break;
                     case ActionType.GoTo:
                         break;
                 }
                 //}  
             }
+        }
+
+        private void ErrorAction(Token token)
+        {
+            OnSintacticalError?.Invoke($@"Syntax error at line {token.Message}, token {token.Lexeme}.");
+            Console.WriteLine(@"Syntax error at line {0}, near token {1}.", token.Message, token.Lexeme);
+            Console.Write(@"Expecting token:");
+            var first = true;
+            foreach (var sym in stringGrammar.SymbolTable)
+            {
+                if (sym.Value.Type == SymbolType.Terminal && parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value))
+                {
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        Console.Write("|");
+                    }
+                    Console.Write(@" ""{0}"" ", sym.Key);
+                }
+            }
+            Console.WriteLine("\n");
+
+            accepted = false;
+
+            PanicModeErrorRecovery();
+        }
+
+        private void ReduceAction(Token token,
+            Dictionary<ActionType, int> actionCounts,
+            Tuple<ActionType, int> action)
+        {
+            Reduce(action.Item2);
+            ParseToken(token, actionCounts);
+        }
+
+        private void AcceptAction()
+        {
+            Console.WriteLine(@"Parse: {0} ms", (DateTime.Now - parseStartTime).TotalMilliseconds);
+        }
+
+        private void ShiftAction(Tuple<ActionType, int> action,
+            Symbol symbol)
+        {
+            Shift(action.Item2, symbol);
         }
 
         private bool KeepEatingTokens(Token token)
