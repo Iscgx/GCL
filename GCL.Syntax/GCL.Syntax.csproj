@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeParserWithSupportForCodeGeneration.cs" />
     <Compile Include="Dynamic\CompiledClass.cs" />
     <Compile Include="Dynamic\CSCodeCompiler.cs" />
     <Compile Include="Dynamic\DynamicCode.cs" />

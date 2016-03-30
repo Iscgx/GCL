@@ -23,11 +23,15 @@ namespace Syntax.Tests
         {
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
+            var errorsourceCode = File.ReadAllText(@"TestData\ErrorSourceCode.txt");
+
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
 
+            var lexer = new Lexer(sourceTokens);
+
             ILexer readGrammarLexer = new Lexer(grammarTokens);
-            ILexer codeLexer = new Lexer(sourceTokens);
+            ILexer codeLexer = lexer;
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
             var semanticMethods = new Dictionary<Production, string>();
 
@@ -40,20 +44,22 @@ namespace Syntax.Tests
 
             stringGrammar.DefineTokens();
 
-            var gclCodeGenerator = new GclCodeGenerator();
-            var semanticAnalysis = new SemanticAnalysis();
+            var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
+            var actionCounts = codeParser.Parse(lexer.Parse(sourceCode));
 
-            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
-            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
-            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
+            actionCounts[ActionType.Accept].Should().Be(1);
+            actionCounts[ActionType.Reduce].Should().Be(320);
+            actionCounts[ActionType.Shift].Should().Be(111);
+            actionCounts.Should().NotContainKey(ActionType.Error);
+            actionCounts.Should().NotContainKey(ActionType.GoTo);
 
-            var codeParser = new CodeParser(gclCodeGenerator,
-                dynamicCodeProvider,
-                semanticAnalysis,
-                semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
-            var code = codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
-            code.Length.Should().Be(415);
+
+            var errorActionCounts = codeParser.Parse(lexer.Parse(errorsourceCode));
+            errorActionCounts[ActionType.Accept].Should().Be(1);
+            errorActionCounts[ActionType.Reduce].Should().Be(296);
+            errorActionCounts[ActionType.Shift].Should().Be(106);
+            errorActionCounts[ActionType.Error].Should().Be(2);
+            errorActionCounts.Should().NotContainKey(ActionType.GoTo);
         }
 
         [Fact]
@@ -62,6 +68,9 @@ namespace Syntax.Tests
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
+
+            var tokens = new Lexer(sourceTokens).Parse(sourceCode);
+
             ILexer readGrammarLexer = new StubLexer();
             ILexer codeLexer = new Lexer(sourceTokens);
             DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
@@ -75,19 +84,14 @@ namespace Syntax.Tests
 
             stringGrammar.DefineTokens();
 
-            var gclCodeGenerator = new GclCodeGenerator();
-            var semanticAnalysis = new SemanticAnalysis();
+            var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
 
-            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
-            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
-            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
-
-            var codeParser = new CodeParser(gclCodeGenerator,
-                dynamicCodeProvider,
-                semanticAnalysis,
-                semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
-            codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
+            var actionCounts = codeParser.Parse(tokens);
+            actionCounts.Should().NotContainKey(ActionType.Accept);
+            actionCounts.Should().NotContainKey(ActionType.Reduce);
+            actionCounts.Should().NotContainKey(ActionType.Shift);
+            actionCounts.Should().NotContainKey(ActionType.Error);
+            actionCounts.Should().NotContainKey(ActionType.GoTo);
         }
     }
 

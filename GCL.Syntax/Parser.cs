@@ -8,52 +8,56 @@ namespace GCL.Syntax
 
     public class Parser
     {
-        public Grammar Grammar { get; private set; }
+        public Grammar Grammar { get; }
         private readonly Dictionary<Node, Node> nodes = new Dictionary<Node, Node>();
 
         public SyntaxTable SyntaxTable { get; private set; }
 
-        public Parser(Grammar grammar, Symbol initialSymbol)
+        public Parser(Grammar grammar)
         {
             Grammar = grammar;
-            var start = grammar.NewSymbol(SymbolType.NonTerminal);
-            var production = new Production(start, initialSymbol);
-            grammar.Add(start, production);
+            var startSymbol = grammar.NewSymbol(SymbolType.NonTerminal);
+            var production = new Production(startSymbol, new [] { new Symbol(SymbolType.NonTerminal, 1) });
+            grammar.Add(startSymbol, production);
 
-            var head = new Node();
-            head.Kernel.Add(production);
+            var head = new Node(new[] {new Element(production)});
             Closure(head);
-            SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, start);
+            SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, startSymbol);
         }
 
         private void Closure(Node node)
         {
             if (nodes.ContainsKey(node) == false)
                 nodes[node] = node;
-            var footer = node.Footer;
             var usedSymbols = new HashSet<Symbol>();
             var availableElements = new Stack<Element>(node.Kernel);
             while (availableElements.Count != 0)
             {
                 var element = availableElements.Pop();
 
-                if (element.ReadIndex < element.Production.Product.Count)
+                if (element.ReadIndex >= element.Production.Product.Count)
                 {
-                    var readSymbol = element.ReadSymbol;
-                    if (usedSymbols.Contains(readSymbol) == false && readSymbol.Type == SymbolType.NonTerminal)
-                    {
-                        usedSymbols.Add(readSymbol);
-                        foreach (var production in Grammar[readSymbol])
-                        {
-                            var productionToElement = new Element(production);
-                            if (footer.Has(productionToElement) == false)
-                            {
-                                availableElements.Push(productionToElement);
-                                footer.Add(production);
-                            }
+                    continue;
+                }
 
-                        }
+                var readSymbol = element.ReadSymbol;
+
+                if (usedSymbols.Contains(readSymbol) || readSymbol.Type != SymbolType.NonTerminal)
+                {
+                    continue;
+                }
+
+                usedSymbols.Add(readSymbol);
+
+                foreach (var production in Grammar[readSymbol])
+                {
+                    var productionToElement = new Element(production);
+                    if (node.Footer.Contains(productionToElement) == false)
+                    {
+                        availableElements.Push(productionToElement);
+                        node.Footer.Add(new Element(production));
                     }
+
                 }
             }
             CreateConnections(node);
