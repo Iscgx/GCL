@@ -9,31 +9,19 @@ MainBlocks :
 
 MainBlock :
 	  Lowlevel 
-		\{
-			codegen.AddCode("\n" + element[1].Attributes.Lexeme + "\n");
-		\}
 	| StructDeclaration 
 	| FunctionDeclaration 
 	| VarDeclaration 
 	| Device { DeviceBlock } 
-		\{
-			AtDevice.Value = false;
-		\} 
 	| Host { HostBlock } 
 :
 
 Lowlevel :
 	lowlevel
-		\{
-			codegen.AddCode(element[1].Attributes.Lexeme + "\n");
-		\}
 :
 
 Device : 
 	\@ device 
-		\{
-			AtDevice.Value = true;
-		\}
 :
 
 Host : 
@@ -60,98 +48,30 @@ DeviceFunction :
 
 AccessModifier : 
 	  public 
-		\{
-			codegen.AddCode("__global__ ");
-			CudaDefined.Value = true;
-		\}
 	| private 
-		\{
-			codegen.AddCode("__device__ ");
-			CudaDefined.Value = true;
-		\} 
 :
 
 DeviceFunctionDeclaration :
 	 DeviceFunctionID { Block }
-	 \{
-		semantic.CloseBlock();
-		codegen.AddCode("}\n\n");
-	 \} 
 :
 
 DeviceFunctionID :
 	Pattern id ( ArrayReference , ArrayReference )
-		\{
-			semantic.NewBlock();
-			semantic.AddVariable("int", "x" , true);
-			semantic.AddVariable("int", "y" , true);
-			semantic.AddVariable("int", "z" , true);
-			semantic.AddArray(element[4].Attributes.Type, element[4].Attributes.ArrayName, AtDevice.Value, element[4].Attributes.ArrayDimension, 100);
-			semantic.AddArray(element[6].Attributes.Type, element[6].Attributes.ArrayName, AtDevice.Value, element[6].Attributes.ArrayDimension, 100);
-			if(element[1].Attributes.Pattern == "map" || element[1].Attributes.Pattern == "gather" ||element[1].Attributes.Pattern == "scatter")
-			{
-				if(element[4].Attributes.ArrayDimension > 3)
-					ThrowError("Source array (\"{0}\") in {1} function expected a maximum of 3 dimensions at line {2}", element[4].Attributes.ArrayName, element[1].Attributes.Pattern, element[3].Attributes.LineNumber);
-				if(element[6].Attributes.ArrayDimension > 3)
-					ThrowError("Destination array (\"{0}\") in {1} function expected a maximum of 3 dimensions at line {2}", element[6].Attributes.ArrayName, element[1].Attributes.Pattern, element[3].Attributes.LineNumber);
-				if(element[4].Attributes.ArrayDimension != element[6].Attributes.ArrayDimension)
-					ThrowError("Map function definition (\"{0}\") expected array parameters with the same number of dimensions at line {1}", element[2].Attributes.Lexeme, element[2].Attributes.LineNumber);
-				else if(element[4].Attributes.Type != element[6].Attributes.Type)
-					ThrowError("Map function definition (\"{0}\") expected array parameters with the array type at line {1}", element[2].Attributes.Lexeme, element[2].Attributes.LineNumber);
-			}
-
-			if(AtDevice.Value == true && CudaDefined.Value == false) 
-			{
-				codegen.AddCode("__device__ ");
-			}
-
-			semantic.AddFunction(element[2].Attributes.Lexeme, "void", AtDevice.Value, semantic.GetDefinedType(element[4].Attributes.Type), semantic.GetDefinedType(element[6].Attributes.Type));
-
-			codegen.AddCode("void " + element[2].Attributes.Lexeme + "(" + element[4].Attributes.Code + ", " + element[6].Attributes.Code + ")\n");
-			codegen.AddCode("{\n\tint x = blockIdx.x * blockDim.x + threadIdx.x;\n\tint y = blockIdx.y * blockDim.y + threadIdx.y;\n\tint z = blockIdx.z * blockDim.z + threadIdx.z;\n");
-		\}
 :
 
 ArrayReference : 
 	 Type [ ArrayContent ] id
-	 \{
-		element[0].Attributes.ArrayDimension = element[3].Attributes.ArrayDimension;
-		element[0].Attributes.Type = element[1].Attributes.Type;
-		element[0].Attributes.ArrayName = element[5].Attributes.Lexeme;
-
-		element[0].Attributes.Code = element[1].Attributes.Type + " ";
-		for(int i = 0;i < element[3].Attributes.ArrayDimension;i++)
-		{
-			element[0].Attributes.Code += "*";
-		}
-		element[0].Attributes.Code += element[5].Attributes.Lexeme;
-	 \}
 :
 
 ArrayContent : 
 	  * , ArrayContent
-	\{
-		element[0].Attributes.ArrayDimension = element[3].Attributes.ArrayDimension + 1;
-	\}
 	| * 
-	\{
-		element[0].Attributes.ArrayDimension = 1;
-	\}
 :
 
 Pattern : 
 	  map 
-		\{
-			element[0].Attributes.Pattern = "map";
-		\}
 	| scatter 
-		\{
-			element[0].Attributes.Pattern = "scatter";			
-		\}
 	| gather
-		\{
-			element[0].Attributes.Pattern = "gather";
-		\} 
 :
 
 #block #priority:1 HostBlock : 
@@ -167,121 +87,34 @@ Pattern :
 
 StructDeclaration : 
 	 StructID VarDeclarations } ; 
-	\{
-		semantic.AddNewStructure(element[1].Attributes.ID, element[2].Attributes.Variables, AtDevice.Value);
-		for(int i = element[2].Attributes.Variables.Count - 1;i >= 0;i--)
-		{	
-			var variable = element[2].Attributes.Variables[i];
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("\t" + variable.Item1 + " " + variable.Item2 + ";\n");
-		}
-		codegen.AddTabs(semantic.BlocksOpened());
-		codegen.AddCode("};\n\n");
-	\}
 :
 
 StructID :
 	struct type_id {
-	 \{
-		element[0].Attributes.ID = element[2].Attributes.Lexeme;
-		codegen.AddTabs(semantic.BlocksOpened());
-		codegen.AddCode("struct " + element[2].Attributes.Lexeme + "{\n");
-	 \}
 :
 				
 FunctionDeclaration : 
 	 FunctionSymbol { Block } 
-		\{ 
-			semantic.CloseBlock(); semantic.CloseFunction(); 
-			codegen.AddCode("}\n\n");
-		\}
 :
 
 FunctionSymbol : 
 	  FunctionID FunctionBody 
-	  \{
-		semantic.AddFunction(element[1].Attributes.FunctionName, element[1].Attributes.ReturnType, AtDevice.Value, element[2].Attributes.Parameters.ToArray());
-	  \} 
 :
 
 FunctionID : 
 	 Type id
-	 \{
-		semantic.NewBlock(); 
-		element[0].Attributes.ReturnType = element[1].Attributes.Type;
-		element[0].Attributes.FunctionName = element[2].Attributes.Lexeme;
-		if(AtDevice.Value == true && CudaDefined.Value == false) 
-		{
-			codegen.AddCode("__device__ ");
-		}
-		
-		if(AtDevice.Value == true)
-		{
-			codegen.AddCode("void " + element[2].Attributes.Lexeme);
-		}
-		else
-		{
-			codegen.AddCode(element[1].Attributes.Type + " " + element[2].Attributes.Lexeme);
-		}
-
-		CudaDefined.Value = false;
-	 \}
 :
 
 FunctionBody : 
 	  ( ParamsList ) 
-		\{			
-			element[0].Attributes.Parameters = new List<Semantic.Type>();
-			foreach(var item in element[2].Attributes.ParameterStack)
-				element[0].Attributes.Parameters.Add(item);
-
-			codegen.AddCode("(");
-			bool first = true;
-			foreach(var param in element[2].Attributes.Params)
-			{
-				if(!first)
-					codegen.AddCode(", ");
-				else
-					first = false;
-				codegen.AddCode(param.Item1 + " " + param.Item2);
-			}
-			codegen.AddCode(")\n{\n");
-		\}
 	| ( ) 
-		\{
-			element[0].Attributes.Parameters = new List<Semantic.Type>();
-			codegen.AddCode("()\n{\n");
-		\}
 :
 				
 ParamsList : 
 	Type id , ParamsList 
-	\{ 
-		element[0].Attributes.ParameterStack = element[4].Attributes.ParameterStack;
-		element[0].Attributes.ParameterStack.Push(semantic.DefinedTypes[element[1].Attributes.Type]);
-		semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme , AtDevice.Value);
-
-		element[0].Attributes.Params = element[4].Attributes.Params;
-		element[0].Attributes.Params.Push(new Tuple<string, string>(element[1].Attributes.Type, element[2].Attributes.Lexeme));
-	\}
 	| Type id
-	\{ 
-		element[0].Attributes.ParameterStack = new Stack<Semantic.Type>();
-		element[0].Attributes.ParameterStack.Push(semantic.DefinedTypes[element[1].Attributes.Type]);
-		semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme , AtDevice.Value);
-
-		element[0].Attributes.Params = new Stack<Tuple<string, string>>();
-		element[0].Attributes.Params.Push(new Tuple<string, string>(element[1].Attributes.Type, element[2].Attributes.Lexeme));
-	\}
 	| ArrayReference , ParamsList
-	\{
-
-	\}
 	| ArrayReference
-	\{
-		element[0].Attributes.ParameterStack = new Stack<Semantic.Type>();
-		semantic.AddArray(element[4].Attributes.Type, element[4].Attributes.ArrayName, AtDevice.Value, element[4].Attributes.ArrayDimension, 100);
-	\}
 :
 
 #block #priority:2 Block : 
@@ -295,73 +128,19 @@ Statement :
 	  SimpleStatement 
 	| ComplexStatement 
 	| break ; 
-		\{
-			codegen.AddCode("break;\n");
-		\}
 	| continue ; 
-		\{
-			codegen.AddCode("continue;\n");
-		\}
 :
 				
 SimpleStatement : 
 	  VarDeclaration 
 	| StructDeclaration 
 	| NewScopeBlock Block } 
-		\{ 
-			semantic.CloseBlock();
-			codegen.AddTabs(semantic.BlocksOpened()); 
-			codegen.AddCode("}\n");
-		\} 
 	| Expr ; 
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode(element[1].Attributes.Code + ";\n");
-		\} 
 	| return Expr ;
-		\{
-			semantic.CheckReturnType(element[2].Attributes.Type);
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("return " + element[2].Attributes.Code + ";\n");
-		\}
 	| id = \@ id ;
-		\{
-
-			if(semantic.UseVariable(element[4].Attributes.Lexeme, !AtDevice.Value))
-			{
-				var type = semantic.GetType(element[4].Attributes.Lexeme, !AtDevice.Value);
-				element[0].Attributes.Type = type;
-				var memcopytype = "";
-				if(!semantic.DeclaredInDevice(element[4].Attributes.Lexeme))
-					memcopytype = "cudaMemcpyHostToDevice";
-				else
-					memcopytype = "cudaMemcpyDeviceToHost";
-				var typeObject = semantic.GetTypeObject(element[4].Attributes.Lexeme, !AtDevice.Value);
-				if(typeObject != null)
-				{
-					if(semantic.IsArray(type))
-					{				
-						codegen.AddTabs(semantic.BlocksOpened());
-						codegen.AddCode("cudaMemcpy(" + element[1].Attributes.Lexeme + ", " + element[4].Attributes.Lexeme + ", " + typeObject.ByteSize + ", " + memcopytype + ");\n");
-
-					}
-				}
-				
-			}
-			else
-			{
-				ThrowError("Variable \"{0}\" used at line {1} has not been declared in {2} context.", element[2].Attributes.Lexeme,element[2].Attributes.LineNumber, AtDevice.Value ? "Host" : "Device");
-				element[0].Attributes.Type = "error";
-			}
-
-		\}
 :
 
-NewScopeBlock : { \{
-	codegen.AddTabs(semantic.BlocksOpened());
-	codegen.AddCode("{\n");
-	semantic.NewBlock();
-\} 
+NewScopeBlock : { 
 :
 						
 ComplexStatement : 
@@ -372,36 +151,16 @@ ComplexStatement :
 LoopStatement :
 	LoopStatementBody SimpleStatement
 	| DoWhile SimpleStatement while ( Expr ) ; 
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("while(" + element[5].Attributes.Code + ");\n");
-		\}
 :
 
 DoWhile :
 	do
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("do\n");
-		\}
 :
 					
-LoopStatementBody : //PENDIENTE	
+LoopStatementBody : 
 	  for ( VarDeclaration Expr ; Expr )
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("for(;" + element[4].Attributes.Code + ";" + element[6].Attributes.Code + ")\n");
-		\}
 	| for ( Expr ; Expr ; Expr )
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("for(" + element[3].Attributes.Code + ";" + element[4].Attributes.Code + ";" + element[6].Attributes.Code + ")\n");
-		\}
 	| while ( Expr )
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("while(" + element[3].Attributes.Code + ")");
-		\}
 :
 
 ConditionalStatement : //PENDIENTE	
@@ -412,18 +171,10 @@ ConditionalStatement : //PENDIENTE
 
 IfBody :
 	if ( Expr )
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("if(" + element[3].Attributes.Code + ")\n");
-		\}
 :
 
 ElseBody :
 	else
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			codegen.AddCode("else\n");
-		\}
 :
 					
 SwitchBody : //PENDIENTE	
@@ -434,988 +185,189 @@ SwitchBody : //PENDIENTE
 					
 VarDeclarations : 
 	  Type id ; VarDeclarations
-		\{
-			element[0].Attributes.Variables = element[4].Attributes.Variables;
-			element[0].Attributes.Variables.Add(new Tuple<string,string>(element[1].Attributes.Type,element[2].Attributes.Lexeme));		
-		\} 
+				\} 
 	| Type id ; 
-		\{
-			element[0].Attributes.Variables = new List<Tuple<string, string>>();
-			element[0].Attributes.Variables.Add(new Tuple<string,string>(element[1].Attributes.Type,element[2].Attributes.Lexeme));
-		\}
 :
 
 VarDeclaration : 
 	  Type id = Expr ; 
-		\{ 
-			if(element[1].Attributes.AtDevice == true)
-				semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme , element[1].Attributes.AtDevice);
-			else
-				semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme , AtDevice.Value); 
-
-			if(element[1].Attributes.Type != semantic.MaxType(element[1].Attributes.Type, element[4].Attributes.Type))
-			{
-				ThrowError("Types are different for assignment at line {0}. Types: {1},{2}. Max type: {3}.", element[2].Attributes.LineNumber, element[1].Attributes.Type, element[4].Attributes.Type, semantic.MaxType(element[1].Attributes.Type, element[4].Attributes.Type));
-				element[0].Attributes.Type = "error";
-			}
-
-			codegen.AddTabs(semantic.BlocksOpened());
-			if(AtDevice.Value && semantic.BlocksOpened() == 0)
-				codegen.AddCode("__device__ ");
-			codegen.AddCode(element[1].Attributes.Type + " " + element[2].Attributes.Lexeme + " = " + element[4].Attributes.Code + ";\n");
-		\}
+ 
 	| Type id ; 
-		\{ 
-			if(element[1].Attributes.AtDevice == true)
-				semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme , element[1].Attributes.AtDevice);
-			else
-				semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme , AtDevice.Value); 
-			codegen.AddTabs(semantic.BlocksOpened());
-			if(AtDevice.Value && semantic.BlocksOpened() == 0)
-				codegen.AddCode("__device__ ");
-			codegen.AddCode(element[1].Attributes.Type + " " + element[2].Attributes.Lexeme + ";\n");
-		\}
+ 
 	| const Type id = Expr ;
-		\{
-			if(element[2].Attributes.AtDevice == true)
-				semantic.AddConstant(element[2].Attributes.Type, element[3].Attributes.Lexeme , element[2].Attributes.AtDevice);
-			else
-				semantic.AddConstant(element[2].Attributes.Type, element[3].Attributes.Lexeme , AtDevice.Value);
-
-			if(element[2].Attributes.Type != semantic.MaxType(element[2].Attributes.Type, element[5].Attributes.Type))
-			{
-				ThrowError("Types are different for assignment at line {0}. Types: {1},{2}. Max type: {3}.", element[2].Attributes.LineNumber, element[1].Attributes.Type, element[4].Attributes.Type, semantic.MaxType(element[1].Attributes.Type, element[4].Attributes.Type));
-				element[0].Attributes.Type = "error";
-			}
-
-			codegen.AddTabs(semantic.BlocksOpened());
-			if(AtDevice.Value && semantic.BlocksOpened() == 0)
-				codegen.AddCode("__device__ ");
-			codegen.AddCode("const " + element[2].Attributes.Type + " " + element[3].Attributes.Lexeme + " = " + element[5].Attributes.Code + ";\n");
-		\}
 	| const Type id ; 
-		\{ 
-			if(element[2].Attributes.AtDevice == true)
-				semantic.AddConstant(element[2].Attributes.Type, element[3].Attributes.Lexeme , element[2].Attributes.AtDevice);
-			else
-				semantic.AddConstant(element[2].Attributes.Type, element[3].Attributes.Lexeme , AtDevice.Value); 
-
-			codegen.AddTabs(semantic.BlocksOpened());
-			if(AtDevice.Value && semantic.BlocksOpened() == 0)
-				codegen.AddCode("__device__ ");
-			codegen.AddCode("const " + element[2].Attributes.Type + " " + element[3].Attributes.Lexeme + ";\n");
-		\}
+ 
 	| ArrayDeclaration ;
-		\{
-			codegen.AddTabs(semantic.BlocksOpened());
-			if(AtDevice.Value && semantic.BlocksOpened() == 0)
-				codegen.AddCode("__device__ ");
-			codegen.AddCode(element[1].Attributes.Code + ";\n");
-		\}
 :
 
 ArrayDeclaration :
 	Type id [ ArrayDimension 
-	\{
-		element[0].Attributes.Code = element[1].Attributes.Type + " ";
-		foreach(var dim in element[4].Attributes.ArrayDimensionStack)
-		{
-			element[0].Attributes.Code += "*";
-		}
-		element[0].Attributes.Code += element[2].Attributes.Lexeme;
-
-		var firstArrayDimension = element[4].Attributes.ArrayDimensionStack.Pop();
-		int[] dimensionSizeArray = element[4].Attributes.ArrayDimensionStack.ToArray();
-		semantic.AddArray(element[1].Attributes.Type, element[2].Attributes.Lexeme, AtDevice.Value, element[4].Attributes.ArrayDimension, firstArrayDimension, dimensionSizeArray);
-		
-		if(AtDevice.Value == false)
-		{	
-			element[0].Attributes.Code += " = (" + element[1].Attributes.Type;
-			for(int i = 0;i < element[4].Attributes.ArrayDimension;i++)
-			{
-				element[0].Attributes.Code += "*";
-			}
-			element[0].Attributes.Code += ")malloc(";
-			var typeObject = semantic.GetTypeObject(element[2].Attributes.Lexeme, AtDevice.Value);
-			if(typeObject != null)
-				element[0].Attributes.Code += typeObject.ByteSize + ")";
-		}
-	\}
 :
 
 ArrayDimension :	
 	  E1 , ArrayDimension 
-	\{
-		if(element[1].Attributes.IsIntConstValue == false)
-			ThrowError("Expression inside array brackets must be of type int literal at line {0}", element[2].Attributes.LineNumber);
-		element[0].Attributes.ArrayDimension = element[3].Attributes.ArrayDimension + 1;
-		element[0].Attributes.ArrayDimensionStack = element[3].Attributes.ArrayDimensionStack;
-		element[0].Attributes.ArrayDimensionStack.Push(element[1].Attributes.IntConstValue);
-
-		element[0].Attributes.Index = element[3].Attributes.Index;
-		element[0].Attributes.Index.Push(element[1].Attributes.Code);
-	\}
 	| E1 ]
-	\{
-		if(element[1].Attributes.IsIntConstValue == false)
-			ThrowError("Expression inside array brackets must be of type int literal at line {0}", element[2].Attributes.LineNumber);
-		element[0].Attributes.ArrayDimension = 1;
-		element[0].Attributes.ArrayDimensionStack = new Stack<int>();
-		element[0].Attributes.ArrayDimensionStack.Push(element[1].Attributes.IntConstValue);
-		
-		element[0].Attributes.Index = new Stack<string>();
-		element[0].Attributes.Index.Push(element[1].Attributes.Code);
-	\}
 :
 
 Type : 
 	  FinalType 
-		\{ 
-			element[0].Attributes.Type = element[1].Attributes.Type;
-			element[0].Attributes.AtDevice = false;
-		\}
+ 
 	| \@ FinalType 
-		\{
-			element[0].Attributes.Type = element[2].Attributes.Type;
-			element[0].Attributes.AtDevice = true;
-		\}
 :
 
 FinalType: 
-	  type_id \{ element[0].Attributes.Type = element[1].Attributes.Lexeme; \}
-	| char \{ element[0].Attributes.Type = "char"; \}
-	| float \{ element[0].Attributes.Type = "float"; \}
-	| bool \{ element[0].Attributes.Type = "bool"; \}
-	| double \{ element[0].Attributes.Type = "double"; \}
-	| long double \{ element[0].Attributes.Type = "long_double"; \}
-	| unsigned IntType \{ element[0].Attributes.Type = "unsigned_"+element[2].Attributes.Type; \}
-	| void \{ element[0].Attributes.Type = "void"; \}
-	| IntType \{ element[0].Attributes.Type = element[1].Attributes.Type; \}
-	| string \{ element[0].Attributes.Type = "string"; \}
+	  type_id 
+	| char 
+	| float 
+	| bool 
+	| double 
+	| long double 
+	| unsigned IntType 
+	| void 
+	| IntType 
+	| string 
 :
 					
 IntType : 
-	  int \{ element[0].Attributes.Type = "int"; \}
-	| short \{ element[0].Attributes.Type = "short_int"; \}
-	| short int \{ element[0].Attributes.Type = "short_int"; \}
-	| long \{ element[0].Attributes.Type = "long_int"; \}
-	| long int \{ element[0].Attributes.Type = "long_int"; \}
+	  int 
+	| short 
+	| short int 
+	| long
+	| long int 
 :
 
 Expr : 
 	E1
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
-	| Subset \{ element[0].Attributes.Type = element[1].Attributes.Type; \}
+	| Subset 
 :
 
 E1 : 
 	E1 = E2
-		\{		
-			if(element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[3].Attributes.IsIntConstValue;	
-			if(semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type) == element[1].Attributes.Type)
-			{
-				element[0].Attributes.Type=element[1].Attributes.Type;
-			}
-			else
-			{
-				ThrowError("Types are different at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Code + " = " + element[3].Attributes.Code;
-		\}
+		
 	| E2
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;	
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
  
 E2 : 
 	E2 assignOp E3
-		\{
-			element[0].Attributes.IsIntConstValue = false;
-			if(semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type) == element[1].Attributes.Type)
-			{
-				element[0].Attributes.Type=element[1].Attributes.Type;
-			}
-			else
-			{
-				ThrowError("Types are different at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " (" + element[3].Attributes.Code + ")";
-		\}
 	| E3
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 E3 : 
 	E3 logOp E4
-		\{
-			element[0].Attributes.IsIntConstValue = false;							
-			if(element[1].Attributes.Type!="bool")
-			{
-				ThrowError("First argument in boolean expression is not bool at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-			else if(element[3].Attributes.Type!="bool")
-			{
-				ThrowError("Second argument in boolean expression is not bool at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-			else
-			{
-				element[0].Attributes.Type="bool";
-			}
-
-			string logOp = element[2].Attributes.Lexeme;
-			if(logOp == ">|<")
-				logOp = "^";
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + logOp + " " + element[3].Attributes.Code + ")";
-		\}
 	| E4
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 E4 : 
 	E4 relOp E5
-		\{
-			element[0].Attributes.IsIntConstValue = false;
-			if(semantic.AreComparableTypes(element[1].Attributes.Type, element[3].Attributes.Type))
-				element[0].Attributes.Type="bool";
-			else
-			{
-				ThrowError("Arguments are not comparable at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E5
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 E5 : 
 	E5 \| E6
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue | element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsBitwiseType(element[1].Attributes.Type))
-			{
-				if(semantic.IsBitwiseType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type=semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in bitwise expression is not bitwise at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in bitwise expression is not bitwise at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E5 & E6
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue & element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsBitwiseType(element[1].Attributes.Type))
-			{
-				if(semantic.IsBitwiseType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type=semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in bitwise expression is not bitwise at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in bitwise expression is not bitwise at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E6
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 E6 : 
 	E6 << E7
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue << element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsBitwiseType(element[1].Attributes.Type))
-			{
-				if(semantic.IsIntegerType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = element[1].Attributes.Type;
-				}
-				else
-				{
-					ThrowError("Second argument in shift expression is not an integer at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in bitwise expression is not bitwise at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E6 >> E7
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue >> element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsBitwiseType(element[1].Attributes.Type))
-			{
-				if(semantic.IsIntegerType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = element[1].Attributes.Type;
-				}
-				else
-				{
-					ThrowError("Second argument in shift expression is not an integer at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in bitwise expression is not bitwise at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E7 
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 E7 : 
 	E7 + E8
-		\{
-		//E7 + E8
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue + element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[1].Attributes.Type))
-			{
-				if(semantic.IsArithmeticType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E7 - E8
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue - element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[1].Attributes.Type))
-			{
-				if(semantic.IsArithmeticType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E8
 
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 E8 : 
 	E8 % E9
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue % element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsIntegerType(element[1].Attributes.Type))
-			{
-				if(semantic.IsIntegerType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in modulus expression is not an integer expression at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in modulus expression is not an integer expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E8 / E9
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue / element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[1].Attributes.Type))
-			{
-				if(semantic.IsArithmeticType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E8 * E9
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue * element[3].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[1].Attributes.Type))
-			{
-				if(semantic.IsArithmeticType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[1].Attributes.Code + " " + element[2].Attributes.Lexeme + " " + element[3].Attributes.Code + ")";
-		\}
 	| E8 ^ E9
-		\{
-			if(element[1].Attributes.IsIntConstValue == true && element[3].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = (int)Math.Pow(element[1].Attributes.IntConstValue, element[3].Attributes.IntConstValue);
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue && element[3].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[1].Attributes.Type))
-			{
-				if(semantic.IsArithmeticType(element[3].Attributes.Type))
-				{
-					element[0].Attributes.Type = semantic.MaxType(element[1].Attributes.Type, element[3].Attributes.Type);
-				}
-				else
-				{
-					ThrowError("Second argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-					element[0].Attributes.Type = "error";
-				}
-			}
-			else
-			{
-				ThrowError("First argument in arithmetic expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "";
-
-			if(AtDevice.Value)
-				element[0].Attributes.Code += "D_";
-			element[0].Attributes.Code += "Pow(" + element[1].Attributes.Code + "," + element[3].Attributes.Code + ")";
-		\}
 	| E9
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-			
-		\}
+ 
 :
 
 E9 : 
 	( Type ) E10 
-		\{
-
-			//De rato
-
-
-
-			//¿el tipo de E10 es «casteable» a Type?
-			if(semantic.IsCastableToType(element[4].Attributes.Type, element[2].Attributes.Type))
-			{
-				element[0].Attributes.Type = element[2].Attributes.Type;
-			}
-			else
-			{
-				ThrowError("Type of argument is not castable to type {0} at line {1}",element[2].Attributes.Type,element[1].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "(" + element[2].Attributes.Type + ")" + element[4].Attributes.Code;
-		\}
 	| prePostfixOp E10
-		\{
-			if(element[2].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[2].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[2].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[2].Attributes.Type))
-			{
-				element[0].Attributes.Type = element[2].Attributes.Type;
-			}
-			else
-			{
-				ThrowError("Argument in prepostfixop expression is not an arithmetic expression at line {0}.", element[1].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Lexeme + element[2].Attributes.Code;
-		\}
 	| E10 prePostfixOp
-		\{
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			if(semantic.IsArithmeticType(element[1].Attributes.Type))
-			{
-				element[0].Attributes.Type = element[1].Attributes.Type;
-			}
-			else
-			{
-				ThrowError("Argument in prepostfixop expression is not an arithmetic expression at line {0}.", element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Code + element[2].Attributes.Lexeme;
-		\}
 	| ! E10
-		\{
-			element[0].Attributes.IsIntConstValue = false;
-			if(semantic.IsBitwiseType(element[2].Attributes.Type))
-			{
-				element[0].Attributes.Type = element[2].Attributes.Type;
-			}
-			else
-			{
-				ThrowError("Negated argument is not a bitwise expression at line {0}.", element[1].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = "!" + element[2].Attributes.Code;
-		\}
 	| & E10
-		\{
-			if(element[2].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[2].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			//PENDIENTE
-			element[0].Attributes.Code = "&" + element[2].Attributes.Code;
-		\}
 	| E10 
-		\{ 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-			
-		\}
+ 
 :
 
 E10 : 
 	( Expr ) 
-		\{ 
-			element[0].Attributes.Type = element[2].Attributes.Type; 
-			if(element[2].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[2].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[2].Attributes.IsIntConstValue;
-
-			element[0].Attributes.Code = "(" + element[2].Attributes.Code + ")";
-		\}
+ 
 	| ExprFinal 
-		\{ 
-			element[0].Attributes.Type = element[1].Attributes.Type;
-			element[0].Attributes.Code = element[1].Attributes.Code; 
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-		\}
+ 
 :
 							
 FunctionCall : 
 	id ( ValueList ) 
-		\{
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-
-			var function = semantic.GetFunction(element[1].Attributes.Lexeme);
-			if(function != null)
-			{
-				element[0].Attributes.Type = function.ReturnType;
-				if(element[3].Attributes.Values.Count < function.Parameters.Count)
-					ThrowError("Function \"{0}\" expected additional parameters at line {1}.", function.Name, element[1].Attributes.LineNumber) ;
-				else if(element[3].Attributes.Values.Count > function.Parameters.Count)
-					ThrowError("Function \"{0}\" received additional parameters at line {1}.", function.Name, element[1].Attributes.LineNumber);
-				else
-				{
-					/*
-					foreach(var type in function.Parameters)
-						if(element[3].Attributes.TypeStack.Count > 0 && semantic.GetTypeName(type) !=  semantic.GetTypeName(element[3].Attributes.TypeStack.Pop()))
-								ThrowError("Function \"{0}\" parameter type mismatch at line {1}.", function.Name, element[1].Attributes.LineNumber);
-					*/
-				}
-
-				var arr = semantic.GetArrayTypeFrom(element[3].Attributes.Values.Peek());
-
-				if(function.AtDevice == true && arr != null)
-				{
-					var cudaValues = arr.GetCudaValues();
-						
-					element[0].Attributes.Code += "<<<" + cudaValues.Item1 + ", " + cudaValues.Item2 + ">>>";
-				}
-			}
-			else
-			{
-				element[0].Attributes.Type = "error";
-				ThrowError("Function \"{0}\" used at line {1} with that parameters is not previously defined.", element[1].Attributes.Lexeme, element[1].Attributes.LineNumber);
-			}
-
-			element[0].Attributes.Code += "(";
-			bool first = true;
-			foreach(var value in element[3].Attributes.Values)
-			{
-				if(!first)
-					element[0].Attributes.Code += ", ";
-				else
-					first = false;
-				element[0].Attributes.Code += value;
-			}
-			element[0].Attributes.Code += ")";
-		\}
 	| id ( ) 
-		\{
-			var function = semantic.GetFunction(element[1].Attributes.Lexeme);
-			if(function != null)
-				element[0].Attributes.Type = function.ReturnType;
-			else
-			{
-				element[0].Attributes.Type = "error";
-				ThrowError("Function \"{0}\" used at line {1} with that parameters is not previously defined.", element[1].Attributes.Lexeme, element[1].Attributes.LineNumber);
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Lexeme + "()";
-		\}
 :
 								
 ValueList : 
 	Expr , ValueList 
-	\{
-		element[0].Attributes.TypeStack = element[3].Attributes.TypeStack;
-		if(semantic.DefinedTypes.ContainsKey(element[1].Attributes.Type))
-			element[0].Attributes.TypeStack.Push(semantic.DefinedTypes[element[1].Attributes.Type]);
-
-		element[0].Attributes.Values = element[3].Attributes.Values;
-		element[0].Attributes.Values.Push(element[1].Attributes.Code);
-	\}
 	| Expr
-	\{
-		var typeStack = new Stack<Semantic.Type>();
-		element[0].Attributes.TypeStack = typeStack;
-		if(semantic.DefinedTypes.ContainsKey(element[1].Attributes.Type))
-			typeStack.Push(semantic.DefinedTypes[element[1].Attributes.Type]);
-
-		element[0].Attributes.Values = new Stack<string>();
-		element[0].Attributes.Values.Push(element[1].Attributes.Code);
-	\}
 :
 
 DeviceFunctionCall : //PENDIENTE	
 	id DeviceBT ( ValueList ) 
 	| id DeviceBT ( ) 
-		\{
-			element[0].Attributes.Code = element[1].Attributes.Lexeme + element[2].Attributes.Code + "()";
-		\}
 :
 
 DeviceBT : //PENDIENTE	
 	[ Dim3 , Dim3 ]
-		\{
-			element[0].Attributes.Code = "<<<" + element[2].Attributes.Code + "," + element[4].Attributes.Code + ">>>";
-		\}
 :
 
 Dim3 : //PENDIENTE
 	Expr 
-		\{
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
 	| dim3 ( Expr ) 
-		\{
-			element[0].Attributes.Code = "dim3(" + element[3].Attributes.Code + ")";
-		\}
 	| dim3 ( Expr , Expr ) 
-		\{
-			element[0].Attributes.Code = "dim3(" + element[3].Attributes.Code + "," + element[5].Attributes.Code + ")";
-		\} 
+				\} 
 	| dim3 ( Expr , Expr , Expr )
-		\{
-			element[0].Attributes.Code = "dim3(" + element[3].Attributes.Code + "," + element[5].Attributes.Code + "," + element[7].Attributes.Code + ")";
-		\}
 :
 							
 ExprFinal : 
 	Value 
-		\{ 
-			element[0].Attributes.Type = element[1].Attributes.Type; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-			if(element[1].Attributes.IsIntConstValue == true)
-				element[0].Attributes.IntConstValue = element[1].Attributes.IntConstValue;
-			element[0].Attributes.IsIntConstValue = element[1].Attributes.IsIntConstValue;
-		\}
+ 
 	| FunctionCall 
-		\{
-			element[0].Attributes.Type = element[1].Attributes.Type;
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
 	| DeviceFunctionCall //PENDIENTE
-		\{
-			element[0].Attributes.Code = element[1].Attributes.Code;
-			element[0].Attributes.Type = "void";
-		\}
 	| \@ id
-		\{
-			var tempName = semantic.GetNextTempName();
-			var prefix = "";
-			
-			element[0].Attributes.IsIntConstValue = false;
-			if(semantic.UseVariable(element[2].Attributes.Lexeme, !AtDevice.Value))
-			{
-				var type = semantic.GetType(element[2].Attributes.Lexeme, !AtDevice.Value);
-				element[0].Attributes.Type = type;
-				var memcopytype = "";
-				if(!semantic.DeclaredInDevice(element[2].Attributes.Lexeme))
-					memcopytype = "cudaMemcpyHostToDevice";
-				else
-					memcopytype = "cudaMemcpyDeviceToHost";
-				var typeObject = semantic.GetTypeObject(element[2].Attributes.Lexeme, !AtDevice.Value);
-				if(typeObject != null)
-				{
-					codegen.AddTabs(semantic.BlocksOpened());
-					codegen.AddCode(type + " " + tempName + ";\n");
-					codegen.AddTabs(semantic.BlocksOpened());
-						codegen.AddCode("cudaMemcpy(&" + tempName + ", &" + element[2].Attributes.Lexeme + ", " + typeObject.ByteSize + ", " + memcopytype + ");\n");
-				}
-				
-				if(element[0].Attributes.Type == "int" || element[0].Attributes.Type == "short_int")
-				{
-					element[0].Attributes.IsIntConstValue = true;
-					element[0].Attributes.IntConstValue = 1;
-				}
-			}
-			else
-			{
-				ThrowError("Variable \"{0}\" used at line {1} has not been declared in {2} context.", element[2].Attributes.Lexeme,element[2].Attributes.LineNumber, AtDevice.Value ? "Host" : "Device");
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = prefix + tempName;
-		\}
 	| id 
-		\{
-			element[0].Attributes.IsIntConstValue = false;
-			if(semantic.UseVariable(element[1].Attributes.Lexeme, semantic.DeclaredInDevice(element[1].Attributes.Lexeme)))
-			{
-				element[0].Attributes.Type = semantic.GetType(element[1].Attributes.Lexeme, AtDevice.Value);
-				if(element[0].Attributes.Type == "int" || element[0].Attributes.Type == "short_int")
-				{
-					element[0].Attributes.IsIntConstValue = true;
-					element[0].Attributes.IntConstValue = 1;
-				}
-			}
-			else
-			{
-				ThrowError("Variable \"{0}\" used at line {1} has not been declared.", element[1].Attributes.Lexeme,element[1].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		\}
 	| id [ ArrayDimension
-	\{
-		element[0].Attributes.IsIntConstValue = false;
-		string baseType;
-		semantic.UseArray(element[1].Attributes.Lexeme, AtDevice.Value, element[3].Attributes.ArrayDimension, out baseType);
-		element[0].Attributes.Type = baseType;
-
-		element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		foreach(var dimension in element[3].Attributes.Index)
-		{
-			element[0].Attributes.Code += "[" + dimension + "]";
-		}
-	\}
 	| StructInstance 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "int";
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 	| true 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "bool"; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 	| false 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "bool"; 
-			element[0].Attributes.Code = element[1].Attributes.Code;
-		\}
+ 
 :
 
 StructFields :
 	id . StructFields
-		\{
-			element[0].Attributes.Fields = element[3].Attributes.Fields;
-			element[0].Attributes.Fields.Push(element[1].Attributes.Lexeme);
-		\}
 	| id
-		\{
-			element[0].Attributes.Fields = new Stack<string>();
-			element[0].Attributes.Fields.Push(element[1].Attributes.Lexeme);
-		\}
 :
 
 StructInstance : 
 	id . StructFields
-		\{
-			//Using structure
-			var type = semantic.StructureInstanceExists(element[1].Attributes.Lexeme, element[3].Attributes.Fields, AtDevice.Value);
-			if(type != null)
-			{
-				element[0].Attributes.Type = type;
-				if(type == "error")
-				{
-					ThrowError("Undeclared Structure Instance \"{0}\"", element[1].Attributes.Lexeme);
-				}
-			}
-			else
-			{
-				ThrowError("Structure Instance \"{0}\" used at line {1} does not have defined the field being used.", element[1].Attributes.Lexeme, element[2].Attributes.LineNumber);
-				element[0].Attributes.Type = "error";
-			}
-
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-
-			var Fields = element[3].Attributes.Fields;
-			foreach(var field in Fields)
-				element[0].Attributes.Code += "." + field;
-		\}
 :
 
 PreSubset :
 	Type id in id where+
-		\{
-			semantic.NewBlock();
-			semantic.AddVariable(element[1].Attributes.Type, element[2].Attributes.Lexeme, AtDevice.Value);
-			element[0].Attributes.Type = element[1].Attributes.Type;
-			element[0].Attributes.LineNumber = element[2].Attributes.LineNumber;
-		\}
 :
 				
 Subset : //PENDIENTE	
@@ -1425,85 +377,19 @@ Subset : //PENDIENTE
 							
 Value : 
 	int_value 
-		\{ 
-			element[0].Attributes.Type = "int";
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-			int value = 0;
-			var result = int.TryParse(element[1].Attributes.Lexeme, out value);
-			if(result)
-			{
-				element[0].Attributes.IntConstValue = value;
-				element[0].Attributes.IsIntConstValue = true;
-			}
-			else
-			{
-				element[0].Attributes.IsIntConstValue = false;
-				ThrowError("Int literal exceeds size of integer value at line {0}", element[0].Attributes.LineNumber);
-			}
-
-		\}
+ 
 	| long_value 
-		\{ 
-			element[0].Attributes.Type = "long_int"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-			long value = 0;
-			var result = long.TryParse(element[1].Attributes.Lexeme, out value);
-			if(result)
-			{
-				element[0].Attributes.IntConstValue = value;
-				element[0].Attributes.IsIntConstValue = true;
-			}
-			else
-			{
-				element[0].Attributes.IsIntConstValue = false;
-				ThrowError("Long literal exceeds size of long value at line {0}", element[0].Attributes.LineNumber);
-			}
-		\}
+ 
 	| short_value 
-		\{ 
-			element[0].Attributes.Type = "short_int"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-			short value = 0;
-			var result = short.TryParse(element[1].Attributes.Lexeme, out value);
-			if(result)
-			{
-				element[0].Attributes.IntConstValue = value;
-				element[0].Attributes.IsIntConstValue = true;
-			}
-			else
-			{
-				element[0].Attributes.IsIntConstValue = false;
-				ThrowError("Short literal exceeds size of short value at line {0}", element[0].Attributes.LineNumber);
-			}
-		\}
+ 
 	| double_value 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "double"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		\}
+ 
 	| float_value 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "float"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		\}
+ 
 	| long_double_value 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "long_double"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		\}
+ 
 	| char_value 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "char"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		\}
+ 
 	| string_value 
-		\{ 
-			element[0].Attributes.IsIntConstValue = false;
-			element[0].Attributes.Type = "string"; 
-			element[0].Attributes.Code = element[1].Attributes.Lexeme;
-		\}
+ 
 :

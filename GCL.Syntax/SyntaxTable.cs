@@ -68,12 +68,13 @@ namespace GCL.Syntax
             {
                 actions.Add(nodes[node], new Dictionary<Symbol, Tuple<ActionType, int>>());
                 if (node != head && node.Kernel.Any(element => element.Production.Producer == startSymbol))
+                {
                     actions[nodes[node]][parser.Grammar.EndOfFile] = new Tuple<ActionType, int>(ActionType.Accept, 0); //Accept input
+                }
                 foreach (var transition in node.Transitions)
                 {
                     if (transition.Key.Type == SymbolType.NonTerminal)
                     {
-                        
                         actions[nodes[node]][transition.Key] = new Tuple<ActionType, int>(ActionType.GoTo, nodes[transition.Value]); //Goto Action
                     }
                     else if (transition.Key.Type != SymbolType.EndOfFile)
@@ -101,8 +102,7 @@ namespace GCL.Syntax
                             var error = new Tuple<ActionType, ActionType>(actions[nodes[node]][symbol].Item1,
                                                                           ActionType.Shift);
                             errors.Add(error);
-                            if (OnError != null)
-                                OnError(error);
+                            OnError?.Invoke(error);
                         }
                         else
                         {

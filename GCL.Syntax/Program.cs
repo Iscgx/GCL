@@ -37,11 +37,7 @@ namespace GCL.Syntax
             dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
             dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
 
-            var codeParser = new CodeParser(gclCodeGenerator,
-                dynamicCodeProvider,
-                semanticAnalysis,
-                semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
+            var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             Console.ReadLine();
         }

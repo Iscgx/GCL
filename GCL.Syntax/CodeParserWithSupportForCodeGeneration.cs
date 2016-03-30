@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GCL.Lex;
 using GCL.Syntax.Data;
+using GCL.Syntax.Dynamic;
 using Semantic;
 
 namespace GCL.Syntax
 {
-    public delegate void OnLexicalError(string message);
-
-    public delegate void OnSintacticalError(string message);
-
-    public class CodeParser
+    public class CodeParserWithSupportForCodeGeneration
     {
         private readonly StringGrammar stringGrammar;
         private readonly Parser parser;
-        private readonly Stack<int> nodeStack = new Stack<int>();
-        private readonly Stack<Symbol> temporalStack = new Stack<Symbol>();
-        private readonly List<Symbol> productionSymbols = new List<Symbol>();
+        private readonly Stack<int> nodeStack;
+        private readonly Stack<Symbol> temporalStack;
+        private readonly List<Symbol> productionSymbols;
+        private readonly Dictionary<Production, string> semanticMethods;
+        private readonly CompiledClass compiledSemanticMethods;
+        private readonly SemanticAnalysis semanticAnalysis;
+        private readonly GclCodeGenerator gclCodeGenerator;
+        private readonly BoolWrapper atDevice;
+        private readonly BoolWrapper cudaDefined;
 
         private bool started = false;
         private DateTime parseStartTime;
@@ -26,14 +28,48 @@ namespace GCL.Syntax
         private bool onErrorRecoveryMode;
         private int errorStateS;
 
-        public OnLexicalError OnLexicalError;
-        public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(StringGrammar stringGrammar,
+        public CodeParserWithSupportForCodeGeneration(GclCodeGenerator gclCodeGenerator,
+            DynamicCodeProvider dynamicCodeProvider,
+            SemanticAnalysis semanticAnalysis,
+            Dictionary<Production, string> semanticMethods,
+            StringGrammar stringGrammar,
             Parser parser)
         {
+            var then = DateTime.Now;
+            this.semanticMethods = semanticMethods;
+            nodeStack = new Stack<int>();
+            nodeStack.Push(0);
+            temporalStack = new Stack<Symbol>();
+            productionSymbols = new List<Symbol>();
+            atDevice = new BoolWrapper(false);
+            cudaDefined = new BoolWrapper(false);
+            this.semanticAnalysis = semanticAnalysis;
             this.stringGrammar = stringGrammar;
+            
             this.parser = parser;
+
+            this.gclCodeGenerator = gclCodeGenerator;
+
+            dynamicCodeProvider.AddToScope(productionSymbols, "element");
+            dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
+            dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
+
+            //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
+            try
+            {
+                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider,
+                    "Semantic.dll",
+                    "Microsoft.CSharp.dll",
+                    "System.Core.dll",
+                    "System.dll",
+                    "System.Collections.dll");
+            }
+            catch (Exception)
+            {
+
+            }
+            Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
         public Dictionary<ActionType, int> Parse(IEnumerable<Token> tokens)
@@ -60,7 +96,6 @@ namespace GCL.Syntax
             }
             if (stringGrammar.TokenDictionary.ContainsKey(token.Type) == false)
             {
-                OnLexicalError?.Invoke(token.Message);
             }
             else
             {
@@ -88,95 +123,46 @@ namespace GCL.Syntax
                 switch (action.Item1)
                 {
                     case ActionType.Shift:
-                        ShiftAction(action, symbol);
+                        Shift(action.Item2, symbol);
                         break;
                     case ActionType.Accept:
-                        AcceptAction();
+                        Console.WriteLine(accepted && semanticAnalysis.SemanticError == false ? @"Accepted" : @"Not accepted");
+                        Console.WriteLine(@"Parse: {0} ms", (DateTime.Now - parseStartTime).TotalMilliseconds);
                         break;
                     case ActionType.Reduce:
-                        ReduceAction(token, actionCounts, action);
+                        Reduce(action.Item2);
+                        ParseToken(token, actionCounts);
                         break;
                     case ActionType.Error:
-                        ErrorAction(token);
+                        Console.WriteLine(@"Syntax error at line {0}, near token {1}.", token.Message, token.Lexeme);
+                        Console.Write(@"Expecting token:");
+                        var first = true;
+                        foreach(var sym in stringGrammar.SymbolTable)
+                        {
+                            if (sym.Value.Type == SymbolType.Terminal && parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value))
+                            {
+                                if (first)
+                                {
+                                    first = false;
+                                }
+                                else
+                                {
+                                    Console.Write("|");
+                                }
+                                Console.Write(@" ""{0}"" ", sym.Key);
+                            }
+                        }
+                        Console.WriteLine("\n");
+
+                        accepted = false;
+
+                        PanicModeErrorRecovery();
                         break;
                     case ActionType.GoTo:
                         break;
                 }
                 //}  
             }
-        }
-
-        private void ErrorAction(Token token)
-        {
-            OnSintacticalError?.Invoke($@"Syntax error at line {token.Message}, token {token.Lexeme}.");
-            Console.WriteLine(@"Syntax error at line {0}, near token {1}.", token.Message, token.Lexeme);
-            Console.Write(@"Expecting token:");
-            var first = true;
-
-            var errorSymbols = stringGrammar.SymbolTable.Where(
-                sym =>
-                    sym.Value.Type == SymbolType.Terminal &&
-                    parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value)).Select(kvp => kvp.Key);
-
-            foreach (var sym in errorSymbols)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    Console.Write("|");
-                }
-                Console.Write(@" ""{0}"" ", sym);
-            }
-            Console.WriteLine("\n");
-
-            accepted = false;
-
-            PanicModeErrorRecovery();
-        }
-
-        private void ReduceAction(Token token,
-            Dictionary<ActionType, int> actionCounts,
-            Tuple<ActionType, int> action)
-        {
-            var production = parser.SyntaxTable.ProductionById(action.Item2);
-            var reversedStack = new Stack<Symbol>();
-
-            for (var i = 0; i < production.Product.Count; i++)
-            {
-                nodeStack.Pop();
-                reversedStack.Push(temporalStack.Pop());
-            }
-            var producer = (Symbol) production.Producer.Clone();
-            productionSymbols.Add(producer);
-            foreach (var symbol in reversedStack)
-            {
-                productionSymbols.Add(symbol);
-            }
-
-            productionSymbols.Clear();
-            temporalStack.Push(producer);
-            var goTo = parser.SyntaxTable[nodeStack.Peek(), production.Producer];
-            nodeStack.Push(goTo.Item2);
-
-
-            ParseToken(token, actionCounts);
-        }
-
-        private void AcceptAction()
-        {
-            Console.WriteLine(@"Parse: {0} ms", (DateTime.Now - parseStartTime).TotalMilliseconds);
-        }
-
-        private void ShiftAction(Tuple<ActionType, int> action,
-            Symbol symbol)
-        {
-            nodeStack.Push(action.Item2);
-            var s = (Symbol) symbol.Clone();
-            s.Attributes.Lexeme = symbol.Attributes.Lexeme;
-            temporalStack.Push(s);
         }
 
         private bool KeepEatingTokens(Token token)
@@ -248,6 +234,52 @@ namespace GCL.Syntax
 
             errorStateS = s;
             onErrorRecoveryMode = true;
+        }
+
+        private void Shift(int value, Symbol symbol)
+        {
+            nodeStack.Push(value);
+            var s = (Symbol) symbol.Clone();
+            s.Attributes.Lexeme = symbol.Attributes.Lexeme;
+            temporalStack.Push(s);
+        }
+
+        private void Reduce(int value)
+        {
+            var production = parser.SyntaxTable.ProductionById(value);
+            var reversedStack = new Stack<Symbol>();
+
+            for (var i = 0; i < production.Product.Count; i++)
+            {
+                nodeStack.Pop();
+                reversedStack.Push(temporalStack.Pop());
+            }
+            var producer = (Symbol) production.Producer.Clone();
+            productionSymbols.Add(producer);
+            foreach (var symbol in reversedStack)
+            {
+                productionSymbols.Add(symbol);
+            }
+
+            if (compiledSemanticMethods != null && semanticMethods.ContainsKey(production) == true)
+                compiledSemanticMethods.Call(semanticMethods[production]);
+            //PrintProduction(production);
+            productionSymbols.Clear();
+            temporalStack.Push(producer);
+            var goTo = parser.SyntaxTable[nodeStack.Peek(), production.Producer];
+            nodeStack.Push(goTo.Item2);
+        }
+
+        private void PrintProduction(Production prod)
+        {
+            var builder = new StringBuilder();
+
+            builder.Append(string.Format("[{0}] -> ", stringGrammar.GetSymbolName(prod.Producer)));
+            foreach (var symbol in prod.Product)
+            {
+                builder.Append(string.Format("[{0}]", stringGrammar.GetSymbolName(symbol)));
+            }
+            Console.WriteLine(builder.ToString());
         }
     }
 }

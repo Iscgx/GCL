@@ -59,6 +59,7 @@
     <Compile Include="Structure.cs" />
     <Compile Include="Symbol.cs" />
     <Compile Include="ISymbolTable.cs" />
+    <Compile Include="SymbolType.cs" />
     <Compile Include="ThrowError.cs" />
     <Compile Include="Type.cs" />
     <Compile Include="TypeParameters.cs" />

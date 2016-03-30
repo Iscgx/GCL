@@ -7,18 +7,16 @@ namespace Semantic
 {
     public class Symbol : ICloneable
     {
-        public SymbolType Type;
-        public readonly int Id;
-        public readonly Dictionary<string, Attribute> Properties;
-        public dynamic Attributes;
-
+        public SymbolType Type { get; }
+        public int Id { get; }
+        public Dictionary<string, Attribute> Properties { get; } = new Dictionary<string, Attribute>();
+        public dynamic Attributes { get; }
 
         public Symbol(SymbolType type, int id, IEnumerable<Attribute> properties = null)
         {
             Attributes = new ExpandoObject();
             Type = type;
             Id = id;
-            Properties = new Dictionary<string, Attribute>();
             
             if (properties != null)
             {
@@ -58,7 +56,7 @@ namespace Semantic
 
         public override string ToString()
         {
-            return string.Format("[{0}]", Id);
+            return $"[{Id}]";
         }
 
         public static bool operator ==(Symbol s1, Symbol s2)
@@ -71,13 +69,5 @@ namespace Semantic
             return !(s1 == s2);
         }
 
-    }
-
-    public enum SymbolType
-    {
-        Terminal,
-        NonTerminal,
-        Epsilon,
-        EndOfFile
     }
 }

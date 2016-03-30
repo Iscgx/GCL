@@ -7,31 +7,21 @@ namespace GCL.Syntax.Data
 {
     public class Production
     {
-        private readonly HashSet<Symbol> productSet;
         private readonly int hashCode;
 
         public Symbol Producer { get; }
 
-        public List<Symbol> Product { get; }
+        public IReadOnlyList<Symbol> Product { get; }
 
-        public Production(Symbol producer, params Symbol[] extraProductSymbols)
+        public Production(Symbol producer, IEnumerable<Symbol> extraProductSymbols)
         {
             if (producer.Type != SymbolType.NonTerminal)
                 throw new GrammaticException("Producer cannot be of type Terminal or Epsilon.", producer);
+
             this.Producer = producer;
-            Product = new List<Symbol>(extraProductSymbols);
-            productSet = new HashSet<Symbol>(Product);
+            Product = extraProductSymbols.ToList();
+
             hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
-        }
-
-        public Production(Symbol producer, IEnumerable<Symbol> productionSymbols) : this(producer, productionSymbols.ToArray())
-        {
-            
-        }
-
-        public bool Produces(Symbol symbol)
-        {
-            return productSet.Contains(symbol);
         }
 
         public override string ToString()
@@ -57,13 +47,8 @@ namespace GCL.Syntax.Data
             var otherProduction = (Production)obj;
             if (otherProduction.Product.Count != Product.Count)
                 return false;
-            for (var i = 0; i < Product.Count; i++)
-            {
-                if (Product[i] != otherProduction.Product[i])
-                    return false;
-            }
 
-            return true;
+            return Product.SequenceEqual(otherProduction.Product);
         }
 
         public static bool operator ==(Production p1, Production p2)
