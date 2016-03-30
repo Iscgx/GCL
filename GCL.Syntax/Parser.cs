@@ -17,7 +17,7 @@ namespace GCL.Syntax
         {
             Grammar = grammar;
             var startSymbol = grammar.NewSymbol(SymbolType.NonTerminal);
-            var production = new Production(startSymbol, new Symbol(SymbolType.NonTerminal, 1));
+            var production = new Production(startSymbol, new [] { new Symbol(SymbolType.NonTerminal, 1) });
             grammar.Add(startSymbol, production);
 
             var head = new Node();

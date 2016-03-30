@@ -13,12 +13,13 @@ namespace GCL.Syntax.Data
 
         public List<Symbol> Product { get; }
 
-        public Production(Symbol producer, params Symbol[] extraProductSymbols)
+        public Production(Symbol producer, IEnumerable<Symbol> extraProductSymbols)
         {
             if (producer.Type != SymbolType.NonTerminal)
                 throw new GrammaticException("Producer cannot be of type Terminal or Epsilon.", producer);
+
             this.Producer = producer;
-            Product = new List<Symbol>(extraProductSymbols);
+            Product = extraProductSymbols.ToList();
 
             hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
         }
