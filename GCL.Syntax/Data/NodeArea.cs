@@ -4,37 +4,28 @@ using System.Linq;
 
 namespace GCL.Syntax.Data
 {
-    public class NodeArea : IEnumerable<Element>
+    public class NodeArea : HashSet<Element>
     {
-        private readonly HashSet<Element> elements;
         private int hashCode = 0;
 
         public NodeArea()
         {
-            elements = new HashSet<Element>();
         }
 
-        public NodeArea(IEnumerable<Element> collection)
+        public NodeArea(IEnumerable<Element> collection) : base(collection)
         {
-            elements = new HashSet<Element>(collection);
-        }
 
-        public void Add(Element element)
-        {
-            elements.Add(element);
         }
 
         public bool Has(Element element)
         {
-            if (element == null)
-                return false;
-            return elements.Contains(element);
+            return Contains(element);
         }
 
         public override int GetHashCode()
         {
             if (hashCode == 0)
-                hashCode = elements.Aggregate(0, (current, element) => current ^ (486187739 & element.GetHashCode()));
+                hashCode = this.Aggregate(0, (current, element) => current ^ (486187739 & element.GetHashCode()));
             return hashCode;
         }
 
@@ -43,7 +34,7 @@ namespace GCL.Syntax.Data
             if (obj == null || (obj is NodeArea) == false)
                 return false;
             var otherNodeArea = obj as NodeArea;
-            return elements.SetEquals(otherNodeArea.elements);
+            return SetEquals(otherNodeArea);
         }
 
         public static bool operator ==(NodeArea n1, NodeArea n2)
@@ -65,17 +56,7 @@ namespace GCL.Syntax.Data
 
         public override string ToString()
         {
-            return $"Count = {elements.Count}";
-        }
-
-        public IEnumerator<Element> GetEnumerator()
-        {
-            return elements.GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return elements.GetEnumerator();
+            return $"Count = {Count}";
         }
     }
 }
