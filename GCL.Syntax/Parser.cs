@@ -30,7 +30,6 @@ namespace GCL.Syntax
         {
             if (nodes.ContainsKey(node) == false)
                 nodes[node] = node;
-            var footer = node.Footer;
             var usedSymbols = new HashSet<Symbol>();
             var availableElements = new Stack<Element>(node.Kernel);
             while (availableElements.Count != 0)
@@ -54,10 +53,10 @@ namespace GCL.Syntax
                 foreach (var production in Grammar[readSymbol])
                 {
                     var productionToElement = new Element(production);
-                    if (footer.Has(productionToElement) == false)
+                    if (node.Footer.Has(productionToElement) == false)
                     {
                         availableElements.Push(productionToElement);
-                        footer.Add(new Element(production));
+                        node.Footer.Add(new Element(production));
                     }
 
                 }
