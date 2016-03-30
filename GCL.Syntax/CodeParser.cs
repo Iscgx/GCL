@@ -153,7 +153,10 @@ namespace GCL.Syntax
         private void ShiftAction(Tuple<ActionType, int> action,
             Symbol symbol)
         {
-            Shift(action.Item2, symbol);
+            nodeStack.Push(action.Item2);
+            var s = (Symbol) symbol.Clone();
+            s.Attributes.Lexeme = symbol.Attributes.Lexeme;
+            temporalStack.Push(s);
         }
 
         private bool KeepEatingTokens(Token token)
@@ -225,14 +228,6 @@ namespace GCL.Syntax
 
             errorStateS = s;
             onErrorRecoveryMode = true;
-        }
-
-        private void Shift(int value, Symbol symbol)
-        {
-            nodeStack.Push(value);
-            var s = (Symbol) symbol.Clone();
-            s.Attributes.Lexeme = symbol.Attributes.Lexeme;
-            temporalStack.Push(s);
         }
 
         private void Reduce(int value)
