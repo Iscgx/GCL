@@ -13,17 +13,17 @@ namespace GCL.Syntax
 
         public SyntaxTable SyntaxTable { get; private set; }
 
-        public Parser(Grammar grammar, Symbol initialSymbol)
+        public Parser(Grammar grammar)
         {
             Grammar = grammar;
-            var start = grammar.NewSymbol(SymbolType.NonTerminal);
-            var production = new Production(start, initialSymbol);
-            grammar.Add(start, production);
+            var startSymbol = grammar.NewSymbol(SymbolType.NonTerminal);
+            var production = new Production(startSymbol, new Symbol(SymbolType.NonTerminal, 1));
+            grammar.Add(startSymbol, production);
 
             var head = new Node();
             head.Kernel.Add(production);
             Closure(head);
-            SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, start);
+            SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, startSymbol);
         }
 
         private void Closure(Node node)

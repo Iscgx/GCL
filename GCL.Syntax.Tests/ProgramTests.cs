@@ -51,7 +51,7 @@ namespace Syntax.Tests
                 dynamicCodeProvider,
                 semanticAnalysis,
                 semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
+                stringGrammar, new Parser(stringGrammar.Grammar));
             var code = codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
             code.Length.Should().Be(415);
         }
@@ -86,7 +86,7 @@ namespace Syntax.Tests
                 dynamicCodeProvider,
                 semanticAnalysis,
                 semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar, new Symbol(SymbolType.NonTerminal, 1)));
+                stringGrammar, new Parser(stringGrammar.Grammar));
             codeParser.Parse(new Lexer(sourceTokens).Parse(sourceCode));
         }
     }
