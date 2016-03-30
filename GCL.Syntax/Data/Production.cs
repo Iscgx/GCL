@@ -11,7 +11,7 @@ namespace GCL.Syntax.Data
 
         public Symbol Producer { get; }
 
-        public List<Symbol> Product { get; }
+        public IReadOnlyList<Symbol> Product { get; }
 
         public Production(Symbol producer, IEnumerable<Symbol> extraProductSymbols)
         {
