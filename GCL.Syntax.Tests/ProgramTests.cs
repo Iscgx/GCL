@@ -42,13 +42,6 @@ namespace Syntax.Tests
 
             stringGrammar.DefineTokens();
 
-            var gclCodeGenerator = new GclCodeGenerator();
-            var semanticAnalysis = new SemanticAnalysis();
-
-            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
-            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
-            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
-
             var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
             var actionCounts = codeParser.Parse(tokens);
 
@@ -81,13 +74,6 @@ namespace Syntax.Tests
             }
 
             stringGrammar.DefineTokens();
-
-            var gclCodeGenerator = new GclCodeGenerator();
-            var semanticAnalysis = new SemanticAnalysis();
-
-            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
-            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
-            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
 
             var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
 

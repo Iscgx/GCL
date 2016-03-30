@@ -15,9 +15,9 @@ namespace GCL.Syntax
     {
         private readonly StringGrammar stringGrammar;
         private readonly Parser parser;
-        private readonly Stack<int> nodeStack;
-        private readonly Stack<Symbol> temporalStack;
-        private readonly List<Symbol> productionSymbols;
+        private readonly Stack<int> nodeStack = new Stack<int>();
+        private readonly Stack<Symbol> temporalStack = new Stack<Symbol>();
+        private readonly List<Symbol> productionSymbols = new List<Symbol>();
 
         private bool started = false;
         private DateTime parseStartTime;
@@ -31,16 +31,8 @@ namespace GCL.Syntax
         public CodeParser(StringGrammar stringGrammar,
             Parser parser)
         {
-            var then = DateTime.Now;
-            nodeStack = new Stack<int>();
-            nodeStack.Push(0);
-            temporalStack = new Stack<Symbol>();
-            productionSymbols = new List<Symbol>();
             this.stringGrammar = stringGrammar;
-            
             this.parser = parser;
-
-            Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
         public Dictionary<ActionType, int> Parse(IEnumerable<Token> tokens)
