@@ -7,7 +7,6 @@ namespace GCL.Syntax.Data
 {
     public class Production
     {
-        private readonly HashSet<Symbol> productSet;
         private readonly int hashCode;
 
         public Symbol Producer { get; }
@@ -20,18 +19,8 @@ namespace GCL.Syntax.Data
                 throw new GrammaticException("Producer cannot be of type Terminal or Epsilon.", producer);
             this.Producer = producer;
             Product = new List<Symbol>(extraProductSymbols);
-            productSet = new HashSet<Symbol>(Product);
+
             hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
-        }
-
-        public Production(Symbol producer, IEnumerable<Symbol> productionSymbols) : this(producer, productionSymbols.ToArray())
-        {
-            
-        }
-
-        public bool Produces(Symbol symbol)
-        {
-            return productSet.Contains(symbol);
         }
 
         public override string ToString()
