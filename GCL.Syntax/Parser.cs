@@ -8,7 +8,7 @@ namespace GCL.Syntax
 
     public class Parser
     {
-        public Grammar Grammar { get; private set; }
+        public Grammar Grammar { get; }
         private readonly Dictionary<Node, Node> nodes = new Dictionary<Node, Node>();
 
         public SyntaxTable SyntaxTable { get; private set; }
@@ -37,23 +37,29 @@ namespace GCL.Syntax
             {
                 var element = availableElements.Pop();
 
-                if (element.ReadIndex < element.Production.Product.Count)
+                if (element.ReadIndex >= element.Production.Product.Count)
                 {
-                    var readSymbol = element.ReadSymbol;
-                    if (usedSymbols.Contains(readSymbol) == false && readSymbol.Type == SymbolType.NonTerminal)
-                    {
-                        usedSymbols.Add(readSymbol);
-                        foreach (var production in Grammar[readSymbol])
-                        {
-                            var productionToElement = new Element(production);
-                            if (footer.Has(productionToElement) == false)
-                            {
-                                availableElements.Push(productionToElement);
-                                footer.Add(production);
-                            }
+                    continue;
+                }
 
-                        }
+                var readSymbol = element.ReadSymbol;
+
+                if (usedSymbols.Contains(readSymbol) || readSymbol.Type != SymbolType.NonTerminal)
+                {
+                    continue;
+                }
+
+                usedSymbols.Add(readSymbol);
+
+                foreach (var production in Grammar[readSymbol])
+                {
+                    var productionToElement = new Element(production);
+                    if (footer.Has(productionToElement) == false)
+                    {
+                        availableElements.Push(productionToElement);
+                        footer.Add(production);
                     }
+
                 }
             }
             CreateConnections(node);
