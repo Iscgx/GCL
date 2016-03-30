@@ -47,13 +47,8 @@ namespace GCL.Syntax.Data
             var otherProduction = (Production)obj;
             if (otherProduction.Product.Count != Product.Count)
                 return false;
-            for (var i = 0; i < Product.Count; i++)
-            {
-                if (Product[i] != otherProduction.Product[i])
-                    return false;
-            }
 
-            return true;
+            return Product.SequenceEqual(otherProduction.Product);
         }
 
         public static bool operator ==(Production p1, Production p2)
