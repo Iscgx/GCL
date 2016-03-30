@@ -81,20 +81,6 @@ namespace GCL.Syntax
             return new List<Production>(products[symbol]);
         }
 
-        public HashSet<Symbol> First(Symbol symbol)
-        {
-            if (calculatedFirsts.ContainsKey(symbol) == true)
-                return new HashSet<Symbol>(calculatedFirsts[symbol]);
-            return First(new List<Symbol>() {symbol});
-        }
-
-        public HashSet<Symbol> First(IEnumerable<Symbol> symbols)
-        {
-            var firstSymbols = new HashSet<Symbol>();
-            First(Epsilon, symbols, firstSymbols);
-            return new HashSet<Symbol>(firstSymbols);
-        }
-
         public HashSet<Symbol> Follow(Symbol symbol)
         {
             if (hasCalculatedFollows == false)
@@ -166,11 +152,25 @@ namespace GCL.Syntax
             }
         }
 
-        private void First(Symbol caller, IEnumerable<Symbol> symbols, HashSet<Symbol> firstSet)
+        public HashSet<Symbol> First(Symbol symbol)
+        {
+            if (calculatedFirsts.ContainsKey(symbol) == true)
+                return new HashSet<Symbol>(calculatedFirsts[symbol]);
+            return First(new List<Symbol>() { symbol });
+        }
+
+        public HashSet<Symbol> First(IEnumerable<Symbol> symbols)
+        {
+            var firstSymbols = new HashSet<Symbol>();
+            First(Epsilon, symbols, firstSymbols);
+            return new HashSet<Symbol>(firstSymbols);
+        }
+
+        private void First(Symbol caller, IEnumerable<Symbol> symbols, ISet<Symbol> firstSet)
         {
             foreach (var symbol in symbols.TakeWhile(symbol => symbol != caller))
             {
-                if (calculatedFirsts.ContainsKey(symbol) == true)
+                if (calculatedFirsts.ContainsKey(symbol))
                 {
                     firstSet.UnionWith(calculatedFirsts[symbol]);
                     //firstSet.Add(symbol);
@@ -195,7 +195,7 @@ namespace GCL.Syntax
 
                 if (calculatedFirsts.ContainsKey(symbol) == false)
                     calculatedFirsts[symbol] = new HashSet<Symbol>(firstSet);
-                if (firstSet.Contains(Epsilon) == true)
+                if (firstSet.Contains(Epsilon))
                     continue;
                 break;
             }
