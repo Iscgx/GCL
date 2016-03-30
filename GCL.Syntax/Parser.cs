@@ -20,8 +20,7 @@ namespace GCL.Syntax
             var production = new Production(startSymbol, new [] { new Symbol(SymbolType.NonTerminal, 1) });
             grammar.Add(startSymbol, production);
 
-            var head = new Node();
-            head.Kernel.Add(new Element(production));
+            var head = new Node(new[] {new Element(production)});
             Closure(head);
             SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, startSymbol);
         }
