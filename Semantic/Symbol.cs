@@ -56,7 +56,7 @@ namespace Semantic
 
         public override string ToString()
         {
-            return string.Format("[{0}]", Id);
+            return $"[{Id}]";
         }
 
         public static bool operator ==(Symbol s1, Symbol s2)
@@ -69,13 +69,5 @@ namespace Semantic
             return !(s1 == s2);
         }
 
-    }
-
-    public enum SymbolType
-    {
-        Terminal,
-        NonTerminal,
-        Epsilon,
-        EndOfFile
     }
 }
