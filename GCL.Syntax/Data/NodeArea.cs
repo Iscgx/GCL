@@ -44,11 +44,6 @@ namespace GCL.Syntax.Data
             return !(n1 == n2);
         }
 
-        public static NodeArea operator +(NodeArea n1, NodeArea n2)
-        {
-            return new NodeArea(n1.Union(n2));
-        }
-
         public override string ToString()
         {
             return $"Count = {Count}";
