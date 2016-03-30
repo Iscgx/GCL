@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using GCL.Lex;
 using GCL.Syntax.Data;
@@ -111,20 +112,23 @@ namespace GCL.Syntax
             Console.WriteLine(@"Syntax error at line {0}, near token {1}.", token.Message, token.Lexeme);
             Console.Write(@"Expecting token:");
             var first = true;
-            foreach (var sym in stringGrammar.SymbolTable)
+
+            var errorSymbols = stringGrammar.SymbolTable.Where(
+                sym =>
+                    sym.Value.Type == SymbolType.Terminal &&
+                    parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value)).Select(kvp => kvp.Key);
+
+            foreach (var sym in errorSymbols)
             {
-                if (sym.Value.Type == SymbolType.Terminal && parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value))
+                if (first)
                 {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        Console.Write("|");
-                    }
-                    Console.Write(@" ""{0}"" ", sym.Key);
+                    first = false;
                 }
+                else
+                {
+                    Console.Write("|");
+                }
+                Console.Write(@" ""{0}"" ", sym);
             }
             Console.WriteLine("\n");
 
