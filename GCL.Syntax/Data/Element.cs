@@ -11,8 +11,8 @@ namespace GCL.Syntax.Data
     public class Element
     {
         private readonly int hashcode;
-        public Production Production { get; private set; }
-        public int ReadIndex { get; private set; }
+        public Production Production { get; }
+        public int ReadIndex { get; }
 
         /// <summary>
         /// Returns the symbol being read by the read index.
