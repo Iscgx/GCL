@@ -78,19 +78,22 @@ namespace GCL.Syntax
             Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
-        public string Parse(IEnumerable<Token> tokens)
+        public Dictionary<ActionType, int> Parse(IEnumerable<Token> tokens)
         {
             nodeStack.Clear();
             nodeStack.Push(0);
             temporalStack.Clear();
+
+            var actionCounts = new Dictionary<ActionType, int>();
             foreach (var token in tokens)
             {
-                ParseToken(token);
+                ParseToken(token, actionCounts);
             }
-            return gclCodeGenerator.End();
+            return actionCounts;
         }
 
-        public void ParseToken(Token token)
+        public void ParseToken(Token token,
+            Dictionary<ActionType, int> actionCounts)
         {
             if (started == false)
             {
@@ -118,6 +121,12 @@ namespace GCL.Syntax
                 //else
                 //{
                 var action = parser.SyntaxTable[nodeStack.Peek(), symbol];
+
+                if (actionCounts.ContainsKey(action.Item1) == false)
+                    actionCounts[action.Item1] = 0;
+
+                actionCounts[action.Item1]++;
+
                 switch (action.Item1)
                 {
                     case ActionType.Shift:
@@ -129,7 +138,7 @@ namespace GCL.Syntax
                         break;
                     case ActionType.Reduce:
                         Reduce(action.Item2);
-                        ParseToken(token);
+                        ParseToken(token, actionCounts);
                         break;
                     case ActionType.Error:
                         OnSintacticalError?.Invoke($@"Syntax error at line {token.Message}, token {token.Lexeme}.");

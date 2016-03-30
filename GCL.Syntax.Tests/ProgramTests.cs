@@ -54,8 +54,14 @@ namespace Syntax.Tests
                 semanticAnalysis,
                 semanticMethods,
                 stringGrammar, new Parser(stringGrammar.Grammar));
-            var code = codeParser.Parse(tokens);
-            code.Length.Should().Be(415);
+            var actionCounts = codeParser.Parse(tokens);
+
+            actionCounts[ActionType.Accept].Should().Be(1);
+            actionCounts[ActionType.Reduce].Should().Be(320);
+            actionCounts[ActionType.Shift].Should().Be(111);
+            actionCounts.Should().NotContainKey(ActionType.Error);
+            actionCounts.Should().NotContainKey(ActionType.GoTo);
+
         }
 
         [Fact]
@@ -92,7 +98,13 @@ namespace Syntax.Tests
                 semanticAnalysis,
                 semanticMethods,
                 stringGrammar, new Parser(stringGrammar.Grammar));
-            codeParser.Parse(tokens);
+
+            var actionCounts = codeParser.Parse(tokens);
+            actionCounts.Should().NotContainKey(ActionType.Accept);
+            actionCounts.Should().NotContainKey(ActionType.Reduce);
+            actionCounts.Should().NotContainKey(ActionType.Shift);
+            actionCounts.Should().NotContainKey(ActionType.Error);
+            actionCounts.Should().NotContainKey(ActionType.GoTo);
         }
     }
 
