@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using GCL.Lex;
 using GCL.Syntax.Data;
-using GCL.Syntax.Dynamic;
 using Semantic;
 
 namespace GCL.Syntax
@@ -19,12 +18,6 @@ namespace GCL.Syntax
         private readonly Stack<int> nodeStack;
         private readonly Stack<Symbol> temporalStack;
         private readonly List<Symbol> productionSymbols;
-        private readonly Dictionary<Production, string> semanticMethods;
-        private readonly CompiledClass compiledSemanticMethods;
-        private readonly SemanticAnalysis semanticAnalysis;
-        private readonly GclCodeGenerator gclCodeGenerator;
-        private readonly BoolWrapper atDevice;
-        private readonly BoolWrapper cudaDefined;
 
         private bool started = false;
         private DateTime parseStartTime;
@@ -35,46 +28,18 @@ namespace GCL.Syntax
         public OnLexicalError OnLexicalError;
         public OnSintacticalError OnSintacticalError;
 
-        public CodeParser(GclCodeGenerator gclCodeGenerator,
-            DynamicCodeProvider dynamicCodeProvider,
-            SemanticAnalysis semanticAnalysis,
-            Dictionary<Production, string> semanticMethods,
-            StringGrammar stringGrammar,
+        public CodeParser(StringGrammar stringGrammar,
             Parser parser)
         {
             var then = DateTime.Now;
-            this.semanticMethods = semanticMethods;
             nodeStack = new Stack<int>();
             nodeStack.Push(0);
             temporalStack = new Stack<Symbol>();
             productionSymbols = new List<Symbol>();
-            atDevice = new BoolWrapper(false);
-            cudaDefined = new BoolWrapper(false);
-            this.semanticAnalysis = semanticAnalysis;
             this.stringGrammar = stringGrammar;
             
             this.parser = parser;
 
-            this.gclCodeGenerator = gclCodeGenerator;
-
-            dynamicCodeProvider.AddToScope(productionSymbols, "element");
-            dynamicCodeProvider.AddToScope(atDevice, "AtDevice");
-            dynamicCodeProvider.AddToScope(cudaDefined, "CudaDefined");
-
-            //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
-            try
-            {
-                compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider,
-                    "Semantic.dll",
-                    "Microsoft.CSharp.dll",
-                    "System.Core.dll",
-                    "System.dll",
-                    "System.Collections.dll");
-            }
-            catch (Exception)
-            {
-
-            }
             Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
@@ -133,7 +98,6 @@ namespace GCL.Syntax
                         Shift(action.Item2, symbol);
                         break;
                     case ActionType.Accept:
-                        Console.WriteLine(accepted && semanticAnalysis.SemanticError == false ? @"Accepted" : @"Not accepted");
                         Console.WriteLine(@"Parse: {0} ms", (DateTime.Now - parseStartTime).TotalMilliseconds);
                         break;
                     case ActionType.Reduce:
@@ -269,25 +233,10 @@ namespace GCL.Syntax
                 productionSymbols.Add(symbol);
             }
 
-            if (compiledSemanticMethods != null && semanticMethods.ContainsKey(production) == true)
-                compiledSemanticMethods.Call(semanticMethods[production]);
-            //PrintProduction(production);
             productionSymbols.Clear();
             temporalStack.Push(producer);
             var goTo = parser.SyntaxTable[nodeStack.Peek(), production.Producer];
             nodeStack.Push(goTo.Item2);
-        }
-
-        private void PrintProduction(Production prod)
-        {
-            var builder = new StringBuilder();
-
-            builder.Append(string.Format("[{0}] -> ", stringGrammar.GetSymbolName(prod.Producer)));
-            foreach (var symbol in prod.Product)
-            {
-                builder.Append(string.Format("[{0}]", stringGrammar.GetSymbolName(symbol)));
-            }
-            Console.WriteLine(builder.ToString());
         }
     }
 }

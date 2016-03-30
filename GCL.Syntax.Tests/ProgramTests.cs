@@ -49,11 +49,7 @@ namespace Syntax.Tests
             dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
             dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
 
-            var codeParser = new CodeParser(gclCodeGenerator,
-                dynamicCodeProvider,
-                semanticAnalysis,
-                semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar));
+            var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
             var actionCounts = codeParser.Parse(tokens);
 
             actionCounts[ActionType.Accept].Should().Be(1);
@@ -93,11 +89,7 @@ namespace Syntax.Tests
             dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
             dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
 
-            var codeParser = new CodeParser(gclCodeGenerator,
-                dynamicCodeProvider,
-                semanticAnalysis,
-                semanticMethods,
-                stringGrammar, new Parser(stringGrammar.Grammar));
+            var codeParser = new CodeParser(stringGrammar, new Parser(stringGrammar.Grammar));
 
             var actionCounts = codeParser.Parse(tokens);
             actionCounts.Should().NotContainKey(ActionType.Accept);
