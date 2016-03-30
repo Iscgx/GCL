@@ -141,10 +141,14 @@ namespace GCL.Syntax
                             if (sym.Value.Type == SymbolType.Terminal && parser.SyntaxTable.ContainsKey(nodeStack.Peek(), sym.Value))
                             {
                                 if (first)
+                                {
                                     first = false;
+                                }
                                 else
+                                {
                                     Console.Write("|");
-                                Console.Write(" \"{0}\" ", sym.Key);
+                                }
+                                Console.Write(@" ""{0}"" ", sym.Key);
                             }
                         }
                         Console.WriteLine("\n");
