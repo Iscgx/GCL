@@ -17,11 +17,6 @@ namespace GCL.Syntax.Data
 
         }
 
-        public bool Has(Element element)
-        {
-            return Contains(element);
-        }
-
         public override int GetHashCode()
         {
             if (hashCode == 0)

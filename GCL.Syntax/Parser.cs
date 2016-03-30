@@ -53,7 +53,7 @@ namespace GCL.Syntax
                 foreach (var production in Grammar[readSymbol])
                 {
                     var productionToElement = new Element(production);
-                    if (node.Footer.Has(productionToElement) == false)
+                    if (node.Footer.Contains(productionToElement) == false)
                     {
                         availableElements.Push(productionToElement);
                         node.Footer.Add(new Element(production));
