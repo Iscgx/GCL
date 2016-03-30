@@ -141,7 +141,27 @@ namespace GCL.Syntax
             Dictionary<ActionType, int> actionCounts,
             Tuple<ActionType, int> action)
         {
-            Reduce(action.Item2);
+            var production = parser.SyntaxTable.ProductionById(action.Item2);
+            var reversedStack = new Stack<Symbol>();
+
+            for (var i = 0; i < production.Product.Count; i++)
+            {
+                nodeStack.Pop();
+                reversedStack.Push(temporalStack.Pop());
+            }
+            var producer = (Symbol) production.Producer.Clone();
+            productionSymbols.Add(producer);
+            foreach (var symbol in reversedStack)
+            {
+                productionSymbols.Add(symbol);
+            }
+
+            productionSymbols.Clear();
+            temporalStack.Push(producer);
+            var goTo = parser.SyntaxTable[nodeStack.Peek(), production.Producer];
+            nodeStack.Push(goTo.Item2);
+
+
             ParseToken(token, actionCounts);
         }
 
@@ -228,29 +248,6 @@ namespace GCL.Syntax
 
             errorStateS = s;
             onErrorRecoveryMode = true;
-        }
-
-        private void Reduce(int value)
-        {
-            var production = parser.SyntaxTable.ProductionById(value);
-            var reversedStack = new Stack<Symbol>();
-
-            for (var i = 0; i < production.Product.Count; i++)
-            {
-                nodeStack.Pop();
-                reversedStack.Push(temporalStack.Pop());
-            }
-            var producer = (Symbol) production.Producer.Clone();
-            productionSymbols.Add(producer);
-            foreach (var symbol in reversedStack)
-            {
-                productionSymbols.Add(symbol);
-            }
-
-            productionSymbols.Clear();
-            temporalStack.Push(producer);
-            var goTo = parser.SyntaxTable[nodeStack.Peek(), production.Producer];
-            nodeStack.Push(goTo.Item2);
         }
     }
 }
