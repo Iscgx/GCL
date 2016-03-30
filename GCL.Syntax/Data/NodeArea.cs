@@ -19,21 +19,11 @@ namespace GCL.Syntax.Data
             elements = new HashSet<Element>(collection);
         }
 
-        private void Add(Element element)
-        {
-            if (element == null)
-// ReSharper disable NotResolvedInText
-                throw new ArgumentNullException("element cannot be null.");
-// ReSharper restore NotResolvedInText
-            elements.Add(element);
-
-        }
-
         public void Add(Production production)
         {
             var element = new Element(production);
-            Add(element);
 
+            elements.Add(element);
         }
 
         public bool Has(Element element)
