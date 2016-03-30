@@ -21,9 +21,7 @@ namespace GCL.Syntax.Data
 
         public void Add(Production production)
         {
-            var element = new Element(production);
-
-            elements.Add(element);
+            elements.Add(new Element(production));
         }
 
         public bool Has(Element element)
