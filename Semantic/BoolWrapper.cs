@@ -11,7 +11,7 @@ namespace Semantic
 
         public BoolWrapper(bool value)
         {
-            this.Value = value;
+            Value = value;
         }
     }
 }

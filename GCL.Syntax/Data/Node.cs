@@ -22,21 +22,21 @@ namespace GCL.Syntax.Data
 
         public Node(IEnumerable<Element> kernel)
         {
-            this.Kernel = new NodeArea(kernel);
+            Kernel = new NodeArea(kernel);
             Footer = new NodeArea();
             Transitions = new Dictionary<Symbol, Node>();
-            neighbors = new HashSet<Node>();
+            this.neighbors = new HashSet<Node>();
         }
 
         public bool IsConnected(Node otherNode)
         {
-            return neighbors.Contains(otherNode);
+            return this.neighbors.Contains(otherNode);
         }
 
         public void AddTransition(Symbol symbol, Node otherNode)
         {
             Transitions[symbol] = otherNode;
-            neighbors.Add(otherNode);
+            this.neighbors.Add(otherNode);
         }
 
         public override int GetHashCode()

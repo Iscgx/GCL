@@ -30,7 +30,7 @@ namespace GCL.Lex
             TokenCourier = parsedTokens.Add;
 
             PreProcessSourceCode(sourceCode);
-            ProcessSourceCode(processedSourceCode);
+            ProcessSourceCode(this.processedSourceCode);
 
             return parsedTokens;
         }
@@ -43,7 +43,7 @@ namespace GCL.Lex
             var tokenIndex = 0;
 
             //var fileLines = File.ReadAllLines("Tokens.txt");
-            var fileLines = tokenDefinitionCode.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var fileLines = this.tokenDefinitionCode.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
             var stringMacro = "";
             var stringDefinition = "";
@@ -167,7 +167,7 @@ namespace GCL.Lex
             }
 
             //Take List of all automata
-            automatas =
+            this.automatas =
                 TokenNames.Select(
                     tokenName =>
                     AutomataCreator.GetAutomataFrom(tokenRegexInt[tokenName].Item1, tokenRegexInt[tokenName].Item2,
@@ -176,19 +176,19 @@ namespace GCL.Lex
             //Add integer values of String and low level
             //Don't add them to tokenNames dictionary so their corresponding automata is not created
             tokenRegexInt["string_value"] = new Tuple<string, int>("\".*\"", tokenIndex);
-            _string = tokenIndex++;
+            this._string = tokenIndex++;
             TokenNames.Add("string_value");
             tokenRegexInt["lowlevel"] = new Tuple<string, int>("@lowlevel{.*}@\"", tokenIndex);
-            lowlevel = tokenIndex++;
+            this.lowlevel = tokenIndex++;
             TokenNames.Add("lowlevel");
             tokenRegexInt["cSharpCode"] = new Tuple<string, int>("\\{.*\\}", tokenIndex);
-            cSharpCode = tokenIndex++;
+            this.cSharpCode = tokenIndex++;
             TokenNames.Add("cSharpCode");
             tokenRegexInt["error"] = new Tuple<string, int>("error", tokenIndex);
-            error = tokenIndex++;
+            this.error = tokenIndex++;
             TokenNames.Add("error");
             tokenRegexInt["endOfFile"] = new Tuple<string, int>("endOfFile", tokenIndex);
-            endOfFile = tokenIndex;
+            this.endOfFile = tokenIndex;
             TokenNames.Add("endOfFile");
         }
 
@@ -202,7 +202,7 @@ namespace GCL.Lex
             if (tokens == null) throw new ArgumentNullException("tokens");
             var matchedToken = false;
             //Check all automata
-            foreach (var automata in automatas.Where(automata => automata.GetifFinal()))
+            foreach (var automata in this.automatas.Where(automata => automata.GetifFinal()))
             {
                 if (TokenCourier != null)
                 {
@@ -220,13 +220,13 @@ namespace GCL.Lex
                 if (text != "")
                 {
                     if (TokenCourier != null)
-                        TokenCourier(new Token(error, text,
+                        TokenCourier(new Token(this.error, text,
                                                "Lexical error at line " + lineCount + ". Undefined token: \"" + text +
                                                "\""));
                 }
             }
 
-            foreach (var automata in automatas)
+            foreach (var automata in this.automatas)
             {
                 automata.Reset();
             }
@@ -241,7 +241,7 @@ namespace GCL.Lex
             #region Tokenize all SourceCode
 
             //Init all automata.
-            foreach (var automaton in automatas)
+            foreach (var automaton in this.automatas)
             {
                 automaton.Start();
             }
@@ -258,7 +258,7 @@ namespace GCL.Lex
                     if (!matchingString && !matchingLowLevel && !matchingCsharpCode)
                         CheckAllAutomata(tokens, lineCount, text);
                     else if (TokenCourier != null)
-                            TokenCourier(new Token(error, temporalLexeme, "Lexical error at line " +lineCount + ". Undefined token: \"" + temporalLexeme + "\""));
+                            TokenCourier(new Token(this.error, temporalLexeme, "Lexical error at line " +lineCount + ". Undefined token: \"" + temporalLexeme + "\""));
                     continue;
                 }
 
@@ -307,7 +307,7 @@ namespace GCL.Lex
                             {
                                 //Not lowlevel, continue moving in automatas
                                 text += sourceCode[i];
-                                foreach (var automata in automatas)
+                                foreach (var automata in this.automatas)
                                 {
                                     automata.Move(sourceCode[i]);
                                 }
@@ -323,7 +323,7 @@ namespace GCL.Lex
                             {
                                 //not string, continue moving in automatas
                                 text += sourceCode[i];
-                                foreach (var automata in automatas)
+                                foreach (var automata in this.automatas)
                                 {
                                     automata.Move(sourceCode[i]);
                                 }
@@ -341,7 +341,7 @@ namespace GCL.Lex
                             {
                                 //not c sharp code, continue moving in automatas
                                 text += sourceCode[i];
-                                foreach (var automata in automatas)
+                                foreach (var automata in this.automatas)
                                 {
                                     automata.Move(sourceCode[i]);
                                 } 
@@ -350,7 +350,7 @@ namespace GCL.Lex
                         default:
                             //Any character
                             text += sourceCode[i];
-                            foreach (var automata in automatas)
+                            foreach (var automata in this.automatas)
                             {
                                 automata.Move(sourceCode[i]);
                             }
@@ -372,7 +372,7 @@ namespace GCL.Lex
                             {
                                 matchingLowLevel = false;
                                 if (TokenCourier != null)
-                                    TokenCourier(new Token(lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
+                                    TokenCourier(new Token(this.lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
                                 i = j;
                             }
                             else
@@ -387,7 +387,7 @@ namespace GCL.Lex
                             {
                                 matchingLowLevel = false;
                                 if (TokenCourier != null)
-                                    TokenCourier(new Token(lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
+                                    TokenCourier(new Token(this.lowlevel, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
                                 i = j;
                             }
                             else
@@ -411,7 +411,7 @@ namespace GCL.Lex
                         i++;
                         matchingCsharpCode = false;
                         if (TokenCourier != null)
-                            TokenCourier(new Token(cSharpCode, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture), true));
+                            TokenCourier(new Token(this.cSharpCode, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture), true));
                     }
                     else
                     {
@@ -430,7 +430,7 @@ namespace GCL.Lex
                         case '\"':
                             matchingString = false;
                             if(TokenCourier != null)
-                                TokenCourier(new Token(_string, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
+                                TokenCourier(new Token(this._string, temporalLexeme, lineCount.ToString(CultureInfo.InvariantCulture)));
                             break;
                     }
                 }
@@ -438,7 +438,7 @@ namespace GCL.Lex
             #endregion
 
             if (TokenCourier != null)
-                TokenCourier(new Token(endOfFile, "endOfFile", lineCount.ToString(CultureInfo.InvariantCulture)));
+                TokenCourier(new Token(this.endOfFile, "endOfFile", lineCount.ToString(CultureInfo.InvariantCulture)));
         }
 
         private void PreProcessSourceCode(string sourceCode)
@@ -671,7 +671,7 @@ namespace GCL.Lex
 
                 #endregion
 
-                processedSourceCode = process;
+            this.processedSourceCode = process;
         }
     }
 }

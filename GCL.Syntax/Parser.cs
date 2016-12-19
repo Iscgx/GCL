@@ -22,13 +22,13 @@ namespace GCL.Syntax
 
             var head = new Node(new[] {new Element(production)});
             Closure(head);
-            SyntaxTable = new SyntaxTable(nodes.Keys.ToList(), head, this, startSymbol);
+            SyntaxTable = new SyntaxTable(this.nodes.Keys.ToList(), head, this, startSymbol);
         }
 
         private void Closure(Node node)
         {
-            if (nodes.ContainsKey(node) == false)
-                nodes[node] = node;
+            if (this.nodes.ContainsKey(node) == false)
+                this.nodes[node] = node;
             var usedSymbols = new HashSet<Symbol>();
             var availableElements = new Stack<Element>(node.Kernel);
             while (availableElements.Count != 0)
@@ -80,14 +80,14 @@ namespace GCL.Syntax
             {
                 var newNode = new Node(group.Value);
 
-                if (nodes.ContainsKey(newNode) == false)
+                if (this.nodes.ContainsKey(newNode) == false)
                 {
-                    nodes.Add(newNode, newNode);
+                    this.nodes.Add(newNode, newNode);
                     Closure(newNode);
                 }
                 else
                 {
-                    newNode = nodes[newNode];
+                    newNode = this.nodes[newNode];
                 }
 
                 if (node.IsConnected(newNode) == false)

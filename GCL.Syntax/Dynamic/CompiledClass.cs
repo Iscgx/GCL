@@ -12,15 +12,15 @@ namespace GCL.Syntax.Dynamic
         public CompiledClass(Assembly compiledAssembly, params object[] parameters)
         {
             this.compiledAssembly = compiledAssembly;
-            classType = this.compiledAssembly.GetType("DynamicCode");
-            instance = Activator.CreateInstance(classType, parameters);
+            this.classType = this.compiledAssembly.GetType("DynamicCode");
+            this.instance = Activator.CreateInstance(this.classType, parameters);
         }
 
         public void Call(string methodName, params object[] parameters)
         {
             try
             {
-                classType.GetMethod(methodName).Invoke(instance, parameters);
+                this.classType.GetMethod(methodName).Invoke(this.instance, parameters);
             }
             catch (Exception e)
             {

@@ -45,7 +45,7 @@ namespace GCL.Syntax.Data
           
             Production = production;
             ReadIndex = readIndex;
-            hashcode = readIndex + Production.GetHashCode();
+            this.hashcode = readIndex + Production.GetHashCode();
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace GCL.Syntax.Data
 
         public override int GetHashCode()
         {
-            return hashcode;
+            return this.hashcode;
         }
 
         /// <summary>

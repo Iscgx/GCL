@@ -15,65 +15,65 @@ namespace GCL.Syntax.Dynamic
 
         public DynamicCodeProvider()
         {
-            scopeVariables = new Dictionary<string, object>();
-            scopeMethods = new Dictionary<string, string>();
-            scopeVariableList = new List<string>();
-            methodsByCode = new Dictionary<string, string>();
+            this.scopeVariables = new Dictionary<string, object>();
+            this.scopeMethods = new Dictionary<string, string>();
+            this.scopeVariableList = new List<string>();
+            this.methodsByCode = new Dictionary<string, string>();
         }
 
         public string AddToScope(object o, string alias)
         {
-            if (scopeVariables.ContainsKey(alias) == true)
+            if (this.scopeVariables.ContainsKey(alias) == true)
                 throw new ApplicationException("Scope variable alias already defined.");
-            scopeVariableList.Add(alias);
-            scopeVariables.Add(alias, o);
+            this.scopeVariableList.Add(alias);
+            this.scopeVariables.Add(alias, o);
             return alias;
         }
 
         public object[] GetScopeVariables()
         {
-            return scopeVariables.Values.ToArray();
+            return this.scopeVariables.Values.ToArray();
         }
 
         public string AddMethod(string code)
         {
             code = code.Trim();
-            if (methodsByCode.ContainsKey(code) == false)
+            if (this.methodsByCode.ContainsKey(code) == false)
             {
-                var methodName = string.Format("f{0}", methodId);
-                methodId += 1;
-                scopeMethods.Add(methodName, code);
-                methodsByCode.Add(code, methodName);
+                var methodName = string.Format("f{0}", this.methodId);
+                this.methodId += 1;
+                this.scopeMethods.Add(methodName, code);
+                this.methodsByCode.Add(code, methodName);
                 return methodName;
             }
-            return methodsByCode[code];       
+            return this.methodsByCode[code];       
         }
 
         public string GetCsCode()
         {
             var classcode = new StringBuilder("using System;\nusing System.Collections.Generic;\npublic class DynamicCode \n{\n");
-            foreach (var scopeVariable in scopeVariables)
+            foreach (var scopeVariable in this.scopeVariables)
             {
                 classcode.AppendLine(string.Format("\tprivate readonly {0} {1};", GetFriendlyTypeName(scopeVariable.Value.GetType()), scopeVariable.Key));
             }
             classcode.Append("\tpublic DynamicCode(");
             var i = 0;
-            foreach (var scopeVariable in scopeVariableList)
+            foreach (var scopeVariable in this.scopeVariableList)
             {
-                classcode.Append(string.Format("{0} {1}", GetFriendlyTypeName(scopeVariables[scopeVariable].GetType()), scopeVariable));
-                if (i < scopeVariables.Count - 1)
+                classcode.Append(string.Format("{0} {1}", GetFriendlyTypeName(this.scopeVariables[scopeVariable].GetType()), scopeVariable));
+                if (i < this.scopeVariables.Count - 1)
                 {
                     classcode.Append(", ");
                 }
                 i += 1;
             }
             classcode.AppendLine(")\n\t{");
-            foreach (var scopeVariable in scopeVariables)
+            foreach (var scopeVariable in this.scopeVariables)
             {
                 classcode.AppendLine(string.Format("\t\tthis.{0} = {0};", scopeVariable.Key));
             }
             classcode.AppendLine("\t}");
-            foreach (var scopeMethod in scopeMethods)
+            foreach (var scopeMethod in this.scopeMethods)
             {
                 classcode.Append(string.Format("\tpublic void {0}() \n\t{{\n\t{1}\n\t}}\n", scopeMethod.Key, scopeMethod.Value));
             }

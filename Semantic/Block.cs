@@ -36,8 +36,8 @@ namespace Semantic
 
         public string GetNextTempName()
         {
-            var r = "Temp_" + tempVal;
-            tempVal += 1;
+            var r = "Temp_" + this.tempVal;
+            this.tempVal += 1;
             return r;
         }
     }

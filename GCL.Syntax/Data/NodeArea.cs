@@ -19,9 +19,9 @@ namespace GCL.Syntax.Data
 
         public override int GetHashCode()
         {
-            if (hashCode == 0)
-                hashCode = this.Aggregate(0, (current, element) => current ^ (486187739 & element.GetHashCode()));
-            return hashCode;
+            if (this.hashCode == 0)
+                this.hashCode = this.Aggregate(0, (current, element) => current ^ (486187739 & element.GetHashCode()));
+            return this.hashCode;
         }
 
         public override bool Equals(object obj)

@@ -14,13 +14,13 @@ namespace GCL.Lex
         public State(bool isFinal)
         {
             this.isFinal = isFinal;
-            transitions = new List<Transition>();
+            this.transitions = new List<Transition>();
         }
 
         //Methods
         public bool StateIsFinal()
         {
-            return isFinal;
+            return this.isFinal;
         }
 
         public void ChangeStateType(bool isFinal)
@@ -29,12 +29,12 @@ namespace GCL.Lex
         }
 
         public void AddTransition(State state, char symbol) {
-            transitions.Add(new Transition(state, symbol));
+            this.transitions.Add(new Transition(state, symbol));
         }
 
         public void AddTransition(State state, char symbol, bool isCombo)
         {
-            transitions.Add(new Transition(state, symbol, isCombo));
+            this.transitions.Add(new Transition(state, symbol, isCombo));
         }
 
         public void AddTransition(Transition t)
@@ -45,12 +45,12 @@ namespace GCL.Lex
         public List<State> Move(char symbol)
         {
             //Foreach transition return states that could move (List of states)
-            return transitions.Select(t => t.Move(symbol)).Where(s => s != null).ToList();
+            return this.transitions.Select(t => t.Move(symbol)).Where(s => s != null).ToList();
         }
 
         public List<Transition> GetTransitions()
         {
-            return transitions;
+            return this.transitions;
         }
 
         public void CopyTransitionsFrom(State externState)
@@ -65,7 +65,7 @@ namespace GCL.Lex
 
         public override string ToString()
         {
-            return string.Format("{0}, {1}", Id, isFinal);
+            return string.Format("{0}, {1}", Id, this.isFinal);
         }
     }
 }

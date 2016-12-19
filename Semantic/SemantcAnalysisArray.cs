@@ -11,27 +11,27 @@ namespace Semantic
         {
             
             
-            if (DefinedTypes.ContainsKey(type) == false)
+            if (this.DefinedTypes.ContainsKey(type) == false)
                 Error("Undefined Type {0} for variable {1}.", type, name);
             else
             {
-                var arrayPrimitive = DefinedTypes[type];
+                var arrayPrimitive = this.DefinedTypes[type];
                 var arrayType = new ArrayType(arrayPrimitive, dimensions, firstDimensionWidth, extraDimensionsWidth);
                 var variable = new Variable(name, arrayType, atDevice);
-                if (blocks.Any())
+                if (this.blocks.Any())
                 {
-                    var currentBlock = blocks[blocks.Count() - 1];
+                    var currentBlock = this.blocks[this.blocks.Count() - 1];
                     if (currentBlock.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name);
                     else
                     {
                         currentBlock.AddVariable(variable);
                         var typeName = string.Format("array({0})", type);
-                        if (definedArrays.ContainsKey(typeName) == false)
+                        if (this.definedArrays.ContainsKey(typeName) == false)
                         {
-                            definedArrays.Add(typeName, arrayType);
-                            stringByType.Add(arrayType, typeName);
-                            DefinedTypes.Add(typeName, arrayType);
+                            this.definedArrays.Add(typeName, arrayType);
+                            this.stringByType.Add(arrayType, typeName);
+                            this.DefinedTypes.Add(typeName, arrayType);
                         }
 
 
@@ -39,31 +39,31 @@ namespace Semantic
                 }
                 else
                 {
-                    if (globalSymbolTable.HasVariable(variable))
+                    if (this.globalSymbolTable.HasVariable(variable))
                         Error("Previously defined variable \"{0}\"", name); //Already exists 
                     else
-                        globalSymbolTable.AddVariable(variable);
+                        this.globalSymbolTable.AddVariable(variable);
                 } 
             }
         }
 
         public ArrayType GetArrayTypeFrom(string name)
         {
-            if (blocks.Any())
+            if (this.blocks.Any())
             {
-                for (var i = blocks.Count() - 1; i >= 0; i--)
+                for (var i = this.blocks.Count() - 1; i >= 0; i--)
                 {
-                    if (blocks[i].Variables.ContainsKey(name)) //Variable found!!
+                    if (this.blocks[i].Variables.ContainsKey(name)) //Variable found!!
                     {
-                        return (ArrayType) blocks[i].Variables[name].Type;
+                        return (ArrayType) this.blocks[i].Variables[name].Type;
                     }
                 }
             }
 
-            if (globalSymbolTable.Variables.ContainsKey(name))
-                return (ArrayType)globalSymbolTable.Variables[name].Type;
-            else if (globalSymbolTable.DeviceSymbolTable.Variables.ContainsKey(name))
-                return (ArrayType)globalSymbolTable.DeviceSymbolTable.Variables[name].Type;
+            if (this.globalSymbolTable.Variables.ContainsKey(name))
+                return (ArrayType) this.globalSymbolTable.Variables[name].Type;
+            else if (this.globalSymbolTable.DeviceSymbolTable.Variables.ContainsKey(name))
+                return (ArrayType) this.globalSymbolTable.DeviceSymbolTable.Variables[name].Type;
 
             else return null;
         }
@@ -72,25 +72,24 @@ namespace Semantic
         {
             ISymbolTable globalTable;
             if (atDevice)
-                globalTable = globalSymbolTable.DeviceSymbolTable;
+                globalTable = this.globalSymbolTable.DeviceSymbolTable;
             else
-                globalTable = globalSymbolTable; 
+                globalTable = this.globalSymbolTable; 
 
-            if (blocks.Any())
+            if (this.blocks.Any())
             {
-                for (var i = blocks.Count() - 1; i >= 0; i--)
+                for (var i = this.blocks.Count() - 1; i >= 0; i--)
                 {
-                    if (blocks[i].Variables.ContainsKey(name) &&
-                        blocks[i].Variables[name].Type.Parameters != TypeParameters.IsStructure && (blocks[i].Variables[name].Type.Parameters & TypeParameters.IsArray)== TypeParameters.IsArray) //Variable found!!
+                    if (this.blocks[i].Variables.ContainsKey(name) && this.blocks[i].Variables[name].Type.Parameters != TypeParameters.IsStructure && (this.blocks[i].Variables[name].Type.Parameters & TypeParameters.IsArray)== TypeParameters.IsArray) //Variable found!!
                     {
-                        var arrayType = (blocks[i].Variables[name].Type as ArrayType);
+                        var arrayType = (this.blocks[i].Variables[name].Type as ArrayType);
                         if (numberOfDimensions != arrayType.Dimensions)
                         {
                             Error("Array {0} expected {1} dimensions but was used with {2}.", name, arrayType.Dimensions, numberOfDimensions);
                             baseType = "error";
                         }
                         else
-                            baseType = stringByType[arrayType.BaseType];
+                            baseType = this.stringByType[arrayType.BaseType];
                         
                         return true;
                     }
@@ -105,7 +104,7 @@ namespace Semantic
                     baseType = "error";
                 }
                 else
-                    baseType = stringByType[arrayType.BaseType];
+                    baseType = this.stringByType[arrayType.BaseType];
                 return true;
             }
             baseType = "error";

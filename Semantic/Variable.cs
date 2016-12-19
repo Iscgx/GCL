@@ -32,7 +32,7 @@ namespace Semantic
         {
             if (ReferenceEquals(null, o)) return false;
             if (ReferenceEquals(this, o)) return true;
-            if (o.GetType() != this.GetType()) return false;
+            if (o.GetType() != GetType()) return false;
             return Equals((Variable) o);
         }
     }

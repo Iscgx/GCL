@@ -18,10 +18,10 @@ namespace GCL.Syntax.Data
             if (producer.Type != SymbolType.NonTerminal)
                 throw new GrammaticException("Producer cannot be of type Terminal or Epsilon.", producer);
 
-            this.Producer = producer;
+            Producer = producer;
             Product = extraProductSymbols.ToList();
 
-            hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
+            this.hashCode = Producer.GetHashCode() + Product.Sum(symbol => symbol.GetHashCode()); 
         }
 
         public override string ToString()
@@ -37,7 +37,7 @@ namespace GCL.Syntax.Data
 
         public override int GetHashCode()
         {
-            return hashCode;
+            return this.hashCode;
         }
 
         public override bool Equals(object obj)
