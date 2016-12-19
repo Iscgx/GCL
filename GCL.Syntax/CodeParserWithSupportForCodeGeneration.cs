@@ -56,19 +56,13 @@ namespace GCL.Syntax
             dynamicCodeProvider.AddToScope(this.cudaDefined, "CudaDefined");
 
             //File.WriteAllText(@"D:\code.txt",dynamicCode.GetCsCode());
-            try
-            {
-                this.compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider,
-                    "Semantic.dll",
+            this.compiledSemanticMethods = CsCodeCompiler.Compile(dynamicCodeProvider,
+                    semanticAnalysis.GetType().Assembly.Location,
                     "Microsoft.CSharp.dll",
                     "System.Core.dll",
                     "System.dll",
                     "System.Collections.dll");
-            }
-            catch (Exception)
-            {
 
-            }
             Console.WriteLine(@"Init: {0} ms", (DateTime.Now - then).TotalMilliseconds);
         }
 
