@@ -13,25 +13,25 @@ namespace Semantic
         {
             this.builder = new StringBuilder(10000);
 
-            this.builder.Append("#include <iostream>\n" +
-                           "#include <vector>\n" +
-                           "#include <cuda_runtime.h>\n\n" +
-                           "#pragma comment(lib, \"cudart\")\n\n" +
-                           "using namespace std;\n");
+            this.builder.Append("#include <iostream>\r\n" +
+                           "#include <vector>\r\n" +
+                           "#include <cuda_runtime.h>\r\n\r\n" +
+                           "#pragma comment(lib, \"cudart\")\r\n\r\n" +
+                           "using namespace std;\r\n");
 
-            this.builder.Append("\ndouble Pow(double _base, double _pow)\n" +
-                           "{\n\tif(_pow <= 0) return 1;\n" +
-                           "\tint i = 0;\n" +
-                           "\tfor (i = 0; i < _pow; i++)\n" +
-                           "\t\t_base *= _base;\n" +
-                           "\treturn _base;\n}\n\n");
+            this.builder.Append("\r\ndouble Pow(double _base, double _pow)\r\n" +
+                           "{\r\n\tif(_pow <= 0) return 1;\r\n" +
+                           "\tint i = 0;\r\n" +
+                           "\tfor (i = 0; i < _pow; i++)\r\n" +
+                           "\t\t_base *= _base;\r\n" +
+                           "\treturn _base;\r\n}\r\n\r\n");
 
-            this.builder.Append("\n__device__ double D_Pow(double _base, double _pow)\n" +
-                           "{\n\tif(_pow <= 0) return 1;\n" +
-                           "\tint i = 0;\n" +
-                           "\tfor (i = 0; i < _pow; i++)\n" +
-                           "\t\t_base *= _base;\n" +
-                           "\treturn _base;\n}\n\n");
+            this.builder.Append("\r\n__device__ double D_Pow(double _base, double _pow)\r\n" +
+                           "{\r\n\tif(_pow <= 0) return 1;\r\n" +
+                           "\tint i = 0;\r\n" +
+                           "\tfor (i = 0; i < _pow; i++)\r\n" +
+                           "\t\t_base *= _base;\r\n" +
+                           "\treturn _base;\r\n}\r\n\r\n");
         }
 
         public void AddCode(string partialCode)

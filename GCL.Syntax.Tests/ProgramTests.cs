@@ -93,6 +93,107 @@ namespace Syntax.Tests
             actionCounts.Should().NotContainKey(ActionType.Error);
             actionCounts.Should().NotContainKey(ActionType.GoTo);
         }
+
+        [Fact]
+        public void CodeGeneration_PinningTest()
+        {
+            var sourceCode = File.ReadAllText(@"TestData/SourceCode.txt");
+            var sourceTokens = File.ReadAllText(@"TestData/Tokens.txt");
+            var grammarCode = File.ReadAllText(@"TestData/GrammarGCL_WithCG.txt");
+            var grammarTokens = File.ReadAllText(@"TestData/GrammarTokens.txt");
+            ILexer readGrammarLexer = new Lexer(grammarTokens);
+            ILexer codeLexer = new Lexer(sourceTokens);
+            DynamicCodeProvider dynamicCodeProvider = new DynamicCodeProvider();
+            var semanticMethods = new Dictionary<Production, string>();
+
+            var stringGrammar = new StringGrammar(codeLexer.TokenNames, dynamicCodeProvider, semanticMethods);
+
+            foreach (var token in readGrammarLexer.Parse(grammarCode))
+            {
+                stringGrammar.AddSymbolDefinition(token);
+            }
+
+            stringGrammar.DefineTokens();
+
+            var gclCodeGenerator = new GclCodeGenerator();
+            var semanticAnalysis = new SemanticAnalysis();
+
+            dynamicCodeProvider.AddToScope(gclCodeGenerator, "codegen");
+            dynamicCodeProvider.AddToScope(semanticAnalysis, "semantic");
+            dynamicCodeProvider.AddToScope(semanticAnalysis.ThrowError, "ThrowError");
+
+            var codeParserWithSupportForCodeGeneration = new CodeParserWithSupportForCodeGeneration(gclCodeGenerator,
+                                                                                                    dynamicCodeProvider,
+                                                                                                    semanticAnalysis,
+                                                                                                    semanticMethods,
+                                                                                                    stringGrammar,
+                                                                                                    new Parser(
+                                                                                                               stringGrammar
+                                                                                                                   .Grammar));
+
+            codeParserWithSupportForCodeGeneration.Parse(new Lexer(sourceTokens).Parse(sourceCode));
+
+            var code = gclCodeGenerator.End();
+            code.Should().Be(
+@"#include <iostream>
+#include <vector>
+#include <cuda_runtime.h>
+
+#pragma comment(lib, ""cudart"")
+
+using namespace std;
+
+double Pow(double _base, double _pow)
+{
+	if(_pow <= 0) return 1;
+	int i = 0;
+	for (i = 0; i < _pow; i++)
+		_base *= _base;
+	return _base;
+}
+
+
+__device__ double D_Pow(double _base, double _pow)
+{
+	if(_pow <= 0) return 1;
+	int i = 0;
+	for (i = 0; i < _pow; i++)
+		_base *= _base;
+	return _base;
+}
+
+__device__ int *d_a;
+__device__ int *d_b;
+__global__ void mapeishon(int *input, int *output)
+{
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+	int z = blockIdx.z * blockDim.z + threadIdx.z;
+	output[x] = (input[x] * input[x]);
+}
+
+int main()
+{
+	int *a = (int*)malloc(8192);
+	int *b = (int*)malloc(8192);
+
+		cudaMalloc (  & d_a , 4096 )  ; 
+		cudaMalloc (  & d_b , 4096 )  ; 
+		 
+	int i = 0;
+	for(;(i < 1024);i++)
+	a[i] = i;
+	cudaMemcpy(d_a, a, 8192, cudaMemcpyHostToDevice);
+	mapeishon<<<2, 512>>>(d_a, d_b);
+	cudaMemcpy(b, d_b, 4096, cudaMemcpyDeviceToHost);
+
+		for ( int i  =  0 ; i  <  1024 ; i ++  ) 
+			cout  <<  i  <<  "" )  ""  <<  b [ i ]   <<  endl ; 
+		 
+}
+
+");
+        }
     }
 
     public class StubLexer : ILexer

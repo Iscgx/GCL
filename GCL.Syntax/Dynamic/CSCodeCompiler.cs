@@ -20,12 +20,12 @@ namespace GCL.Syntax.Dynamic
             foreach (var assembly in assemblies)
                 parameters.ReferencedAssemblies.Add(assembly);
             
-            var r = compiler.CompileAssemblyFromSource(parameters, dynamicCodeProvider.GetCsCode());
-            foreach (var error in r.Errors)
+            var compilerResults = compiler.CompileAssemblyFromSource(parameters, dynamicCodeProvider.GetCsCode());
+            foreach (var error in compilerResults.Errors)
             {
                 Console.WriteLine(error);
             }
-            var compiledAssembly = r.CompiledAssembly;
+            var compiledAssembly = compilerResults.CompiledAssembly;
             return new CompiledClass(compiledAssembly, dynamicCodeProvider.GetScopeVariables());
         }
     }
