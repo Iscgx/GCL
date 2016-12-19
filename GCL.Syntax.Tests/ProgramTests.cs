@@ -25,7 +25,7 @@ namespace Syntax.Tests
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
             var errorsourceCode = File.ReadAllText(@"TestData\ErrorSourceCode.txt");
 
-            var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
+            var grammarCode = File.ReadAllText(@"TestData\GrammarGCL_Light.txt");
             var grammarTokens = File.ReadAllText(@"TestData\GrammarTokens.txt");
 
             var lexer = new Lexer(sourceTokens);
@@ -67,7 +67,7 @@ namespace Syntax.Tests
         {
             var sourceCode = File.ReadAllText(@"TestData\SourceCode.txt");
             var sourceTokens = File.ReadAllText(@"TestData\Tokens.txt");
-            var grammarCode = File.ReadAllText(@"TestData\GrammarGCL.txt");
+            var grammarCode = File.ReadAllText(@"TestData\GrammarGCL_Light.txt");
 
             var tokens = new Lexer(sourceTokens).Parse(sourceCode);
 
